@@ -1,0 +1,56 @@
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewBag.Title = "Log in to the government gateway";
+}
+
+<div>
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+            <partial model="@ViewData.ModelState" name="_ValidationSummary" />
+
+            <h1 class="govuk-heading-xl govuk-!-margin-bottom-3">Sign in</h1>
+            <p class="govuk-hint govuk-!-font-size-24">Enter your Government Gateway credentials to sign in. You received these when you created your HMRC online account.</p>
+        </div>
+    </div>
+
+    <div>
+        <form class="form" method="POST">
+            <input type="hidden" name="search" value="1" />
+            <div class="govuk-grid-row">
+
+                <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-desktop">
+                    <div class="govuk-form-group">
+
+                        <label class="govuk-label govuk-label--m" for="WhatSearchTerm">
+                            What
+                        </label>
+
+                        <div id="what-hint" class="govuk-hint">
+                            Enter a job or company
+                        </div>
+                        <input class="govuk-input" id="WhatSearchTerm" name="WhatSearchTerm" type="text"
+                            aria-describedby="what-hint">
+                    </div>
+                </div>
+                <div class="govuk-grid-column-one-half govuk-grid-column-one-third-from-desktop">
+                    <div
+                        class="govuk-form-group @((ViewData.ModelState[nameof(Model.WhereSearchTerm)]?.ValidationState == Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Invalid) ? "govuk-form-group--error" : "")">
+
+                        <label class="govuk-label govuk-label--m" for="WhereSearchTerm">
+                            Where
+                        </label>
+                        <span asp-validation-for="WhereSearchTerm" class="govuk-error-message"></span>
+                        <div id="where-hint" class="govuk-hint">
+                            Enter a city or postcode
+                        </div>
+                        <input class="govuk-input faa-location-autocomplete" name="WhereSearchTerm" id="WhereSearchTerm"
+                            type="search" spellcheck="false" autocomplete="postal-code" aria-describedby="where-hint">
+                    </div>
+                </div>
+            </div>
+            <div class="govuk-button-group govuk-!-margin-bottom-0" href="search-listing">
+                <button class="govuk-button" data-module="govuk-button">Sign in</button>
+            </div>
+        </form>
+    </div>
+</div>
