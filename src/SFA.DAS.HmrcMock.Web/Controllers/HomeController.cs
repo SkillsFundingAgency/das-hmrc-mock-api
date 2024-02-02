@@ -11,7 +11,7 @@ public class HomeController(IGatewayUserService gatewayUserService) : Controller
 
     [HttpGet]
     [Route("sign-in")]
-    public IActionResult SignIn([FromQuery] string continueUrl, [FromQuery] string origin)
+    public IActionResult SignIn([FromQuery] string? continueUrl, [FromQuery] string? origin)
     {
         ViewData["Continue"] = continueUrl;
         ViewData["Origin"] = origin;
@@ -19,7 +19,8 @@ public class HomeController(IGatewayUserService gatewayUserService) : Controller
     }
     
     [HttpPost]
-    public async Task<IActionResult> HandleSignIn(string continueUrl, string origin, SigninViewModel userData)
+    [Route("sign-in")]
+    public async Task<IActionResult> SignIn(string? continueUrl, string? origin, SigninViewModel userData)
     {
         if (!ModelState.IsValid)
         {
