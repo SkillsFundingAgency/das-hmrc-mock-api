@@ -1,3 +1,4 @@
+using SFA.DAS.HmrcMock.Application.Services;
 using SFA.DAS.HmrcMock.Domain.Interfaces;
 using SFA.DAS.HmrcMock.Web.Services;
 
@@ -8,5 +9,6 @@ public static class AddServiceRegistrationExtension
     public static void AddServiceRegistration(this IServiceCollection services)
     {
         services.AddTransient<IDateTimeService, DateTimeService>();
+        services.AddTransient<IGatewayUserService, GatewayUserService>();
     }
 }
