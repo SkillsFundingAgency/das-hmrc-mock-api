@@ -24,7 +24,7 @@ public static class AddDataProtectionExtensions
                 .Connect(configurationOptions);
 
             services.AddDataProtection()
-                .SetApplicationName("das-apprentice")
+                .SetApplicationName("das-hmrc-mock")
                 .PersistKeysToStackExchangeRedis(redis, "DataProtection-Keys");
         }
     }

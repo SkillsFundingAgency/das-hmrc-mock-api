@@ -11,5 +11,8 @@ public static class AddConfigurationOptionsExtension
     {
         services.Configure<HmrcMockConfiguration>(configuration.GetSection(nameof(HmrcMockConfiguration)));
         services.AddSingleton(cfg => cfg.GetService<IOptions<HmrcMockConfiguration>>()!.Value);
+        
+        // Configure options
+        services.Configure<MongoDbOptions>(configuration.GetSection(nameof(MongoDbOptions)));
     }
 }

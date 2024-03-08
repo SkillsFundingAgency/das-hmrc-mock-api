@@ -1,6 +1,6 @@
 namespace SFA.DAS.HmrcMock.Web.Models;
 
-public class ViewModelBase
+public record ViewModelBase
 {
     private Dictionary<string, string?> ErrorDictionary { get; set; }
 

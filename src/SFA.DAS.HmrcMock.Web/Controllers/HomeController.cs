@@ -11,25 +11,23 @@ public class HomeController(IGatewayUserService gatewayUserService) : Controller
 
     [HttpGet]
     [Route("sign-in")]
-    public IActionResult SignIn([FromQuery] string? continueUrl, [FromQuery] string? origin)
+    public IActionResult SignIn(
+        [FromQuery(Name = "continue")] string? redirectUrl = null,
+        [FromQuery] string? origin = null)
     {
-        ViewData["Continue"] = continueUrl;
-        ViewData["Origin"] = origin;
-        return View(new SigninViewModel());
+        return View(new SigninViewModel() with { Continue = redirectUrl, Origin = origin });
     }
-    
+
     [HttpPost]
     [Route("sign-in")]
-    public async Task<IActionResult> SignIn(string? continueUrl, string? origin, SigninViewModel userData)
+    public async Task<IActionResult> SignIn(SigninViewModel userData)
     {
         if (!ModelState.IsValid)
         {
-            ViewData["Continue"] = continueUrl;
-            ViewData["Origin"] = origin;
             return View("SignIn", userData);
         }
 
-        var validationResult = await gatewayUserService.Validate(userData.UserId, userData.Password);
+        var validationResult = await gatewayUserService.ValidateAsync(userData.UserId, userData.Password);
 
         if (validationResult != null)
         {
@@ -41,15 +39,13 @@ public class HomeController(IGatewayUserService gatewayUserService) : Controller
             // }
             // else
             // {
-                HttpContext.Session.SetString("ValidatedUserKey", validationResult.GatewayID);
-                return Redirect(continueUrl);
+            HttpContext.Session.SetString("ValidatedUserKey", validationResult.GatewayID);
+            return Redirect(userData.Continue);
             // }
         }
         else
         {
             ModelState.AddModelError("Username", "Bad user name or password");
-            ViewData["Continue"] = continueUrl;
-            ViewData["Origin"] = origin;
             return View("SignIn", userData);
         }
     }

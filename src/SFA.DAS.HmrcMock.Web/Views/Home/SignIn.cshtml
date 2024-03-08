@@ -34,10 +34,15 @@
                         Password
                     </label>
                     <span asp-validation-for="Password" class="govuk-error-message"></span>
-                    <input id="Password" name="Password" type="text" maxlength="100" class="govuk-input govuk-!-width-two-thirds" aria-required="true"
+                    <input id="Password" name="Password" type="password" maxlength="100" class="govuk-input govuk-!-width-two-thirds" aria-required="true"
                            aria-describedby="@(!string.IsNullOrEmpty(Model.PasswordError) ? "error-message-password" : "")"
                            value="@Model.Password"/>
                 </div>
+                <!-- Hidden field for Model.Continue -->
+                <input type="hidden" id="Continue" name="Continue" value="@Model.Continue"/>
+
+                <!-- Hidden field for Model.Origin -->
+                <input type="hidden" id="Origin" name="Origin" value="@Model.Origin"/>
                 <div class="govuk-button-group">
                     <button class="govuk-button" type="submit">Continue</button>
                 </div>

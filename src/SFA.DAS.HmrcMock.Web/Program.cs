@@ -16,18 +16,20 @@ builder.Services.AddServiceRegistration();
 
 builder.Services.AddHealthChecks();
 
+builder.Services.AddSession();
+
 builder.Services.Configure<RouteOptions>(options =>
 {
 
 }).AddMvc(options =>
 {
-    //options.Filters.Add(new GoogleAnalyticsFilter());
     if (!isIntegrationTest)
     {
         options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
     }
 
-});
+    // options.Filters.Add<GatewayUserAction>();
+}).AddControllersAsServices(); ;
 
 builder.Services.AddDataProtection(rootConfiguration);
 
@@ -48,11 +50,16 @@ app.UseRouting();
 
 app.UseStaticFiles();
 
+app.UseSession();
+
 app.UseEndpoints(endpointBuilder =>
 {
+    // Map API controllers
+    endpointBuilder.MapControllers();
+    
     endpointBuilder.MapControllerRoute(
         name: "default",
-        pattern: "{controller=HomeController}/{action=SignIn}");
+        pattern: "{controller=Home}/{action=SignIn}");
 });
 
 app.Run();
