@@ -33,14 +33,14 @@ namespace SFA.DAS.HmrcMock.Controllers.Api;
         }
         
         [HttpPost("token")]
-        public async Task<IActionResult> AccessToken([FromBody] TokenRequestModel2 tokenRequest)
+        public async Task<IActionResult> AccessToken([FromBody] TokenRequestModel tokenRequest)
         {
-            if (tokenRequest == null || string.IsNullOrEmpty(tokenRequest.code))
+            if (tokenRequest == null || string.IsNullOrEmpty(tokenRequest.Code))
             {
                 return BadRequest("Invalid request. Code is missing.");
             }
 
-            var authCodeRecord = await authCodeService.Find(tokenRequest.code);
+            var authCodeRecord = await authCodeService.Find(tokenRequest.Code);
             if (authCodeRecord == null)
             {
                 return BadRequest("Invalid code.");
@@ -93,10 +93,7 @@ namespace SFA.DAS.HmrcMock.Controllers.Api;
     
     public class AuthorizePostParams
     {
-        [Required]
         public string ScopeName { get; set; }
-        [Required]
         public string? ClientId { get; set; }
-        [Required]
         public string RedirectUri { get; set; }
     }
