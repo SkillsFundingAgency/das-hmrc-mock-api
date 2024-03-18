@@ -10,15 +10,12 @@ public interface IClientService
     Task<Application> GetById(string? clientId);
 }
 
-public class MongoClientService(IMongoDatabase database) : IClientService
+public class MongoClientService(IMongoDatabase database) : BaseMongoService<Application>(database, "applications"), IClientService
 {
-    private readonly IMongoCollection<Application> _collection =
-        database.GetCollection<Application>("applications");
-
     public async Task<Application> GetById(string? clientId)
     {
         var filter = Builders<Application>.Filter.Eq(a => a.ClientId, clientId);
-        return await _collection.Find(filter).FirstOrDefaultAsync();
+        return await FindOne(filter);
     }
 }
 

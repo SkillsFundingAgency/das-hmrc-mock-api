@@ -1,5 +1,4 @@
 using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.IdGenerators;
 using MongoDB.Driver;
@@ -11,20 +10,12 @@ public interface IEmpRefService
     Task<EmpRefResponse> GetByEmpRef(string empRef);
 }
 
-public class MongoEmpRefService(IMongoDatabase database) : IEmpRefService
+public class MongoEmpRefService(IMongoDatabase database) : BaseMongoService<EmpRefResponse>(database, "emprefs"), IEmpRefService
 {
-    private readonly IMongoCollection<EmpRefResponse> _collection =
-        database.GetCollection<EmpRefResponse>("emprefs");
-
     public async Task<EmpRefResponse> GetByEmpRef(string empref)
     {
         var filter = Builders<EmpRefResponse>.Filter.Eq("empref", empref);
-        
-        var queryDocument = filter.Render(BsonSerializer.SerializerRegistry.GetSerializer<EmpRefResponse>(), BsonSerializer.SerializerRegistry);
-        
-        var a =  await _collection.Find(filter).FirstOrDefaultAsync();
-
-        return a;
+        return await FindOne(filter);
     }
 }
 

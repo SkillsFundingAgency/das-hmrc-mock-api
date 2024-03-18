@@ -12,15 +12,12 @@ public interface IAuthRecordService
     Task<AuthRecord> Find(string id);
 }
 
-public class MongoAuthRecordService(IMongoDatabase database) : IAuthRecordService
+public class MongoAuthRecordService(IMongoDatabase database) : BaseMongoService<AuthRecord>(database, "sys_auth_records"), IAuthRecordService
 {
-    private readonly IMongoCollection<AuthRecord> _collection =
-        database.GetCollection<AuthRecord>("sys_auth_records");
-
     public async Task<AuthRecord> Find(string accessToken)
     {
         var filter = Builders<AuthRecord>.Filter.Eq(authCode => authCode.AccessToken, accessToken);
-        var result = await _collection.Find(filter).FirstOrDefaultAsync();
+        var result = await FindOne(filter);
         return result;
     }
 

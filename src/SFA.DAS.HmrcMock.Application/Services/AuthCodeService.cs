@@ -12,15 +12,12 @@ public interface IAuthCodeService
     Task<int> Insert(AuthCodeRow authCode);
 }
 
-public class MongoAuthCodeService(IMongoDatabase database) : IAuthCodeService
+public class MongoAuthCodeService(IMongoDatabase database) : BaseMongoService<AuthCodeRow>(database, "sys_auth_codes"), IAuthCodeService
 {
-    private readonly IMongoCollection<AuthCodeRow> _collection =
-        database.GetCollection<AuthCodeRow>("sys_auth_codes");
-
     public async Task<AuthCodeRow> Find(string code)
     {
         var filter = Builders<AuthCodeRow>.Filter.Eq(authCode => authCode.AuthorizationCode, code);
-        var result = await _collection.Find(filter).FirstOrDefaultAsync();
+        var result = await FindOne(filter);
         return result;
     }
 

@@ -12,11 +12,8 @@ public interface IAuthRequestService
     Task<AuthRequest> Delete(string id);
 }
 
-public class MongoAuthRequestService(IMongoDatabase database) : IAuthRequestService
+public class MongoAuthRequestService(IMongoDatabase database) : BaseMongoService<AuthRequest>(database, "sys_auth_requests"), IAuthRequestService
 {
-    private readonly IMongoCollection<AuthRequest> _collection =
-        database.GetCollection<AuthRequest>("sys_auth_requests");
-
     public async Task<string> Save(AuthRequest authRequest)
     {
         authRequest.Id = ObjectId.GenerateNewId();
@@ -34,7 +31,7 @@ public class MongoAuthRequestService(IMongoDatabase database) : IAuthRequestServ
     public async Task<AuthRequest> Get(string id)
     {
         var filter = Builders<AuthRequest>.Filter.Eq("_id", ObjectId.Parse(id));
-        var result = await _collection.Find(filter).FirstOrDefaultAsync();
+        var result = await FindOne(filter);
         return result;
     }
 }

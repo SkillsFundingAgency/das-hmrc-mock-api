@@ -9,21 +9,19 @@ public interface IGatewayUserService
     Task<GatewayUserResponse> GetByGatewayIdAsync(string gatewayID);
 }
 
-public class MongoGatewayUserService(IMongoDatabase database) : IGatewayUserService
+public class MongoGatewayUserService(IMongoDatabase database) 
+    : BaseMongoService<GatewayUserResponse>(database, "gateway_users"), IGatewayUserService
 {
-    private readonly IMongoCollection<GatewayUserResponse> _collection =
-        database.GetCollection<GatewayUserResponse>("gateway_users");
-
     public async Task<GatewayUserResponse> GetByGatewayIdAsync(string gatewayId)
     {
         var filter = Builders<GatewayUserResponse>.Filter.Eq(u => u.GatewayID, gatewayId);
-        return await _collection.Find(filter).FirstOrDefaultAsync();
+        return await FindOne(filter);
     }
 
     public async Task<GatewayUserResponse> GetByEmprefAsync(string empref)
     {
         var filter = Builders<GatewayUserResponse>.Filter.Eq(u => u.Empref, empref);
-        return await _collection.Find(filter).FirstOrDefaultAsync();
+        return await FindOne(filter);
     }
 
     public async Task<GatewayUserResponse> ValidateAsync(string gatewayID, string password)
