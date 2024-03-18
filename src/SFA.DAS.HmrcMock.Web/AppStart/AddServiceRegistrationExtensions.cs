@@ -22,6 +22,7 @@ public static class AddServiceRegistrationExtension
         services.AddScoped<IAuthCodeService, MongoAuthCodeService>();
         services.AddScoped<ICreateAccessTokenHandler, CreateAccessTokenHandler>();
         services.AddScoped<IAuthRecordService, MongoAuthRecordService>();
+        services.AddScoped<IEmpRefService, MongoEmpRefService>();
         services.AddSingleton<IMongoDatabase>(provider =>
         {
             var mongoDbOptions = provider.GetRequiredService<IOptions<MongoDbOptions>>().Value;
