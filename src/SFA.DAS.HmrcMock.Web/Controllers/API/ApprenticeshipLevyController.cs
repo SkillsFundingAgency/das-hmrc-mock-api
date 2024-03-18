@@ -1,4 +1,5 @@
 using System.Net.Http.Headers;
+using System.Web;
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.HmrcMock.Application.Services;
 
@@ -6,7 +7,10 @@ namespace SFA.DAS.HmrcMock.Controllers.Api;
 
 [Route("api/apprenticeship-levy")]
 [ApiController]
-public class ApprenticeshipLevyController(IGatewayUserService gatewayUserService, IAuthRecordService authRecordService)
+public class ApprenticeshipLevyController(
+    IGatewayUserService gatewayUserService, 
+    IAuthRecordService authRecordService,
+    IEmpRefService empRefService)
     : ControllerBase
 {
     [HttpGet]
@@ -27,15 +31,18 @@ public class ApprenticeshipLevyController(IGatewayUserService gatewayUserService
     [HttpGet("epaye/{empRef}")]
     public async Task<IActionResult> EPaye([FromRoute]string empRef)
     {
-        return await TryAuthenticate(async user =>
+        empRef = HttpUtility.UrlDecode(empRef);
+        return await TryAuthenticate(async _ =>
         {
-            var empRefs = user.Empref != null ? new List<string> { user.Empref } : new List<string>();
-            var response = new RootResponse
+            var response = await empRefService.GetByEmpRef(empRef);
+            if (response != null)
             {
-                Emprefs = empRefs
-            };
-
-            return Ok(response);
+                return Ok(response);
+            }
+            else
+            {
+                return NotFound();
+            }
         });
     }
 
