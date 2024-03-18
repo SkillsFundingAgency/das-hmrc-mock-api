@@ -29,7 +29,7 @@ builder.Services.Configure<RouteOptions>(options =>
     }
 
     // options.Filters.Add<GatewayUserAction>();
-}).AddControllersAsServices(); ;
+}).AddControllersAsServices().AddNewtonsoftJson();
 
 builder.Services.AddDataProtection(rootConfiguration);
 

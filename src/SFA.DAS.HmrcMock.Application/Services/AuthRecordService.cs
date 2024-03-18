@@ -8,6 +8,8 @@ namespace SFA.DAS.HmrcMock.Application.Services;
 public interface IAuthRecordService
 {
     Task<int> Insert(AuthRecord authRecord);
+
+    Task<AuthRecord> Find(string id);
 }
 
 public class MongoAuthRecordService(IMongoDatabase database) : IAuthRecordService
@@ -15,9 +17,9 @@ public class MongoAuthRecordService(IMongoDatabase database) : IAuthRecordServic
     private readonly IMongoCollection<AuthRecord> _collection =
         database.GetCollection<AuthRecord>("sys_auth_records");
 
-    public async Task<AuthRecord> Find(string Id)
+    public async Task<AuthRecord> Find(string accessToken)
     {
-        var filter = Builders<AuthRecord>.Filter.Eq(authCode => authCode.Id, ObjectId.Parse(Id));
+        var filter = Builders<AuthRecord>.Filter.Eq(authCode => authCode.AccessToken, accessToken);
         var result = await _collection.Find(filter).FirstOrDefaultAsync();
         return result;
     }

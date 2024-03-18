@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using SFA.DAS.HmrcMock.Application.Helpers;
 using SFA.DAS.HmrcMock.Application.Services;
 
@@ -55,8 +56,7 @@ public interface ICreateAccessTokenHandler
         private AccessToken BuildAccessToken(AuthRecord authRecord)
         {
             var expiresIn = TimeSpan.FromSeconds(authRecord.ExpiresIn);
-            var refreshedAt = authRecord.RefreshedAt ?? DateTime.UtcNow;
-            return new AccessToken(authRecord.AccessToken, authRecord.RefreshToken, authRecord.Scope, (int)expiresIn.TotalSeconds, refreshedAt);
+            return new AccessToken(authRecord.AccessToken, authRecord.RefreshToken, authRecord.Scope, (int)expiresIn.TotalSeconds);
         }
 
         private string GenerateToken()
@@ -69,12 +69,14 @@ public interface ICreateAccessTokenHandler
         string token,
         string refreshToken,
         string scope,
-        int expiresInTotalSeconds,
-        DateTime refreshedAt)
+        int expiresInTotalSeconds)
     {
+        [JsonProperty("access_token")] 
         public string Token { get; } = token;
+        [JsonProperty("refresh_token")] 
         public string RefreshToken { get; } = refreshToken;
+        [JsonProperty("scope")] 
         public string Scope { get; } = scope;
+        [JsonProperty("expires_in")] 
         public int ExpiresInTotalSeconds { get; } = expiresInTotalSeconds;
-        public DateTime RefreshedAt { get; } = refreshedAt;
     }
