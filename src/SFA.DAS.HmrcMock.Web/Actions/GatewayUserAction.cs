@@ -6,8 +6,6 @@ namespace SFA.DAS.HmrcMock.Web.Actions;
 
 public class GatewayUserAction(IGatewayUserService gatewayUsers) : IAsyncActionFilter
 {
-    private readonly IGatewayUserService _gatewayUsers = gatewayUsers;
-
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
         if (context.HttpContext.Request.Path.Equals("/gg/sign-in", StringComparison.OrdinalIgnoreCase))
@@ -23,7 +21,7 @@ public class GatewayUserAction(IGatewayUserService gatewayUsers) : IAsyncActionF
             return;
         }
 
-        var user = await _gatewayUsers.GetByGatewayIdAsync(userId);
+        var user = await gatewayUsers.GetByGatewayIdAsync(userId);
         if (user == null)
         {
             context.Result = new RedirectToActionResult("SignIn", "Home",
