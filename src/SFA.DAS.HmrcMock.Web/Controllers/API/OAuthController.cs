@@ -1,10 +1,9 @@
-using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using SFA.DAS.HmrcMock.Application.Services;
 using SFA.DAS.HmrcMock.Application.TokenHandlers;
 
-namespace SFA.DAS.HmrcMock.Controllers.Api;
+namespace SFA.DAS.HmrcMock.Web.Controllers.API;
 
     [Route("api/[controller]")]
     [ApiController]

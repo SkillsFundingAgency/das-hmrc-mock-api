@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace SFA.DAS.HmrcMock.Controllers.Api;
+namespace SFA.DAS.HmrcMock.Web.Controllers.API;
 
     [Route("api/[controller]")]
     [ApiController]

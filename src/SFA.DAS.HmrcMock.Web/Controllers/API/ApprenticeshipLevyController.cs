@@ -3,7 +3,7 @@ using System.Web;
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.HmrcMock.Application.Services;
 
-namespace SFA.DAS.HmrcMock.Controllers.Api;
+namespace SFA.DAS.HmrcMock.Web.Controllers.API;
 
 [Route("api/apprenticeship-levy")]
 [ApiController]
