@@ -1,3 +1,9 @@
+parameters:
+- name: OverrideBlockOnPossibleDataLoss
+  displayName: Add /p:BlockOnPossibleDataLoss=false argument to DACPAC deployment
+  type: boolean
+  default: false
+
 trigger:
   batch: true
   branches:
@@ -6,13 +12,13 @@ trigger:
 
 variables:
 - name: SolutionBaseName
-  value: __SolutionBaseName__ #PLACEHOLDER
+  value: SFA.DAS.HmrcMock
 - name: BuildConfiguration
   value: release
 - name: BuildPlatform
   value: any cpu
 - group: RELEASE Management Resources
-- group: __ReleaseVariableGroupName__ #PLACEHOLDER
+- group: RELEASE das-hmrc-mock-api
 - name: Deploy
   value: $[or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['Build.Reason'], 'Manual'), eq(variables['Build.Reason'], 'PullRequest'))]
 
@@ -23,12 +29,12 @@ resources:
   - repository: das-platform-building-blocks
     type: github
     name: SkillsFundingAgency/das-platform-building-blocks
-    ref: refs/tags/__LATESTRELEASETAG__ #PLACEHOLDER
+    ref: refs/tags/2.1.7
     endpoint: SkillsFundingAgency
   - repository: das-platform-automation
     type: github
     name: SkillsFundingAgency/das-platform-automation
-    ref: refs/tags/__LATESTRELEASETAG__ #PLACEHOLDER
+    ref: refs/tags/5.1.5
     endpoint: SkillsFundingAgency
   pipelines:
   - pipeline: das-employer-config
@@ -43,7 +49,7 @@ stages:
     parameters:
       SolutionBaseName: $(SolutionBaseName)
       BuildConfiguration: $(BuildConfiguration)
-    
+
 - stage: Deploy_AT
   dependsOn: Build
   displayName: Deploy to AT
@@ -57,6 +63,7 @@ stages:
       Environment: AT
       SolutionBaseName: $(SolutionBaseName)
       ServiceConnection: SFA-DAS-DevTest-ARM
+      OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss }}
 
 - stage: Deploy_TEST
   dependsOn: Build
@@ -70,6 +77,7 @@ stages:
       Environment: TEST
       SolutionBaseName: $(SolutionBaseName)
       ServiceConnection: SFA-DAS-DevTest-ARM
+      OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss }}
 
 - stage: Deploy_TEST2
   dependsOn: Build
@@ -83,6 +91,7 @@ stages:
       Environment: TEST2
       SolutionBaseName: $(SolutionBaseName)
       ServiceConnection: SFA-DAS-DevTest-ARM
+      OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss }}
 
 - stage: Deploy_PP
   dependsOn: Build
@@ -96,6 +105,7 @@ stages:
       Environment: PP
       SolutionBaseName: $(SolutionBaseName)
       ServiceConnection: SFA-DIG-PreProd-ARM
+      OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss }}
 
 # - stage: Deploy_PROD
 #   dependsOn: Build
@@ -136,3 +146,4 @@ stages:
       Environment: DEMO
       SolutionBaseName: $(SolutionBaseName)
       ServiceConnection: SFA-DAS-DevTest-ARM
+      OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss }}
