@@ -12,7 +12,8 @@ namespace SFA.DAS.HmrcMock.Web.Controllers.API;
 public class ApprenticeshipLevyController(
     IGatewayUserService gatewayUserService, 
     IAuthRecordService authRecordService,
-    IEmpRefService empRefService)
+    IEmpRefService empRefService,
+    ILogger<ApprenticeshipLevyController> logger)
     : ControllerBase
 {
     [HttpGet]
@@ -62,6 +63,14 @@ public class ApprenticeshipLevyController(
                     return await action(user);
                 }
             }
+            else
+            {
+                logger.LogError("Cannot parse authorization header");
+            }
+        }
+        else
+        {
+            logger.LogError("No authorization header in the request");
         }
 
         return Forbid();
