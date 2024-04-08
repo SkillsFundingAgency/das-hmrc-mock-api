@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using SFA.DAS.HmrcMock.Web.AppStart;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +20,9 @@ builder.Services.AddHealthChecks();
 
 builder.Services.AddSession();
 
+// Add the custom AllowAnonymousFilter to the services
+builder.Services.AddScoped<AllowAnonymousFilter>();
+
 builder.Services.Configure<RouteOptions>(options =>
 {
 
@@ -28,29 +33,27 @@ builder.Services.Configure<RouteOptions>(options =>
         options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
     }
 
-    // options.Filters.Add<GatewayUserAction>();
+    options.Filters.Add<AllowAnonymousFilter>();
 }).AddControllersAsServices().AddNewtonsoftJson();
 
 builder.Services.AddDataProtection(rootConfiguration);
 
 builder.Services.AddApplicationInsightsTelemetry();
 
-
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
-
 }
 
 app.UseHealthChecks("/ping");
 
-app.UseRouting();
-
 app.UseStaticFiles();
 
 app.UseSession();
+
+app.UseRouting();
 
 app.UseEndpoints(endpointBuilder =>
 {

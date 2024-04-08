@@ -1,11 +1,13 @@
 using System.Net.Http.Headers;
 using System.Web;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.HmrcMock.Application.Services;
 
 namespace SFA.DAS.HmrcMock.Web.Controllers.API;
 
 [Route("api/apprenticeship-levy")]
+[AllowAnonymous]
 [ApiController]
 public class ApprenticeshipLevyController(
     IGatewayUserService gatewayUserService, 
