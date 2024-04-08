@@ -1,6 +1,8 @@
-using Microsoft.AspNetCore.Authorization;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging.ApplicationInsights;
 using SFA.DAS.HmrcMock.Web.AppStart;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -37,6 +39,12 @@ builder.Services.Configure<RouteOptions>(options =>
 }).AddControllersAsServices().AddNewtonsoftJson();
 
 builder.Services.AddDataProtection(rootConfiguration);
+
+builder.Services.AddLogging(builder =>
+{
+    builder.AddFilter<ApplicationInsightsLoggerProvider>(string.Empty, LogLevel.Information);
+    builder.AddFilter<ApplicationInsightsLoggerProvider>("Microsoft", LogLevel.Information);
+});
 
 builder.Services.AddApplicationInsightsTelemetry();
 
