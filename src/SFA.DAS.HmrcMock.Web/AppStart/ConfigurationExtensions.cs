@@ -10,8 +10,7 @@ public static class ConfigurationExtensions
             .AddConfiguration(config)
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddEnvironmentVariables();
-
-
+        
         if (!isIntegrationTest)
         {
             configBuilder.AddAzureTableStorage(options =>

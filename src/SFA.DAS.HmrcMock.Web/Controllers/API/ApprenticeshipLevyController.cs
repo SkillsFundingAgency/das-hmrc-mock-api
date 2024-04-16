@@ -1,4 +1,5 @@
 using System.Net.Http.Headers;
+using System.Text.Json;
 using System.Web;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -38,8 +39,10 @@ public class ApprenticeshipLevyController(
         return await TryAuthenticate(async _ =>
         {
             var response = await empRefService.GetByEmpRef(empRef);
+            logger.LogInformation($"Emp ref response: {JsonSerializer.Serialize(response)}");
             if (response != null)
             {
+                logger.LogInformation($"Sending empref response: {JsonSerializer.Serialize(response)}");
                 return Ok(response);
             }
             else
@@ -50,30 +53,41 @@ public class ApprenticeshipLevyController(
     }
 
     private async Task<IActionResult> TryAuthenticate(Func<GatewayUserResponse, Task<IActionResult>> action)
-    {
+    {   
         if (HttpContext.Request.Headers.TryGetValue("Authorization", out var authHeader))
         {
+            logger.LogInformation($"Auth header: {JsonSerializer.Serialize(authHeader)}");
             if (AuthenticationHeaderValue.TryParse(authHeader, out var accessToken))
             {
+                logger.LogInformation($"AccessToken: {JsonSerializer.Serialize(accessToken)}");
                 var authRecord = await authRecordService.Find(accessToken.Parameter);
+                
+                logger.LogInformation($"Auth record: {JsonSerializer.Serialize(authRecord)}");
+                
                 var user = await gatewayUserService.GetByGatewayIdAsync(authRecord?.GatewayId);
 
+                logger.LogInformation($"user: {JsonSerializer.Serialize(user)}");
+                
                 if (user != null)
                 {
+                    logger.LogInformation($"Executing action");
                     return await action(user);
                 }
+                
+                logger.LogInformation($"User is null? {JsonSerializer.Serialize(user)}");
             }
             else
             {
-                logger.LogError("Cannot parse authorization header");
+                logger.LogInformation("Cannot parse authorization header");
             }
         }
         else
         {
-            logger.LogError("No authorization header in the request");
+            logger.LogInformation("No authorization header in the request");
         }
 
-        return Forbid();
+        logger.LogInformation($"Cannot parse authorization header, {JsonSerializer.Serialize(HttpContext.Request.Headers)}");
+        return BadRequest();
     }
 }
 

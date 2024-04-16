@@ -1,21 +1,26 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Text.Json;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
 using SFA.DAS.HmrcMock.Application.Services;
 using SFA.DAS.HmrcMock.Web.Models;
 
 namespace SFA.DAS.HmrcMock.Web.Controllers;
 
 [Route("gg")]
-public class HomeController(IGatewayUserService gatewayUserService) : Controller
+public class HomeController(
+    IGatewayUserService gatewayUserService,
+    ILogger<HomeController> logger,
+    IDistributedCache cache) : Controller
 {
-    private readonly IGatewayUserService _gatewayUserService = gatewayUserService;
-
     [HttpGet]
     [Route("sign-in")]
     public IActionResult SignIn(
         [FromQuery(Name = "continue")] string? redirectUrl = null,
         [FromQuery] string? origin = null)
     {
-        return View(new SigninViewModel() with { Continue = redirectUrl, Origin = origin });
+        
+        logger.LogInformation($"{nameof(SignIn)} - {JsonSerializer.Serialize(new {redirectUrl, origin})}");
+        return View(new SigninViewModel { Continue = redirectUrl, Origin = origin });
     }
 
     [HttpPost]
@@ -29,19 +34,15 @@ public class HomeController(IGatewayUserService gatewayUserService) : Controller
 
         var validationResult = await gatewayUserService.ValidateAsync(userData.UserId, userData.Password);
 
+        logger.LogInformation($"{nameof(SignIn)} - ValidationResult: {JsonSerializer.Serialize(validationResult)}");
+
         if (validationResult != null)
         {
-            // always seems to be false for us
-            // if (validationResult.Require2SV.GetValueOrDefault(false))
-            // {
-            //     HttpContext.Session.SetString("ValidatedUserKey", validationResult.GatewayID);
-            //     return RedirectToAction("Show", "AccessCode", new { continueUrl, origin });
-            // }
-            // else
-            // {
-            HttpContext.Session.SetString("ValidatedUserKey", validationResult.GatewayID);
+            await cache.SetStringAsync("ValidatedUserKey", validationResult.GatewayID);
+
+            logger.LogInformation($"Set Cache entry: {JsonSerializer.Serialize(validationResult.GatewayID)}");
+            
             return Redirect(userData.Continue);
-            // }
         }
         else
         {

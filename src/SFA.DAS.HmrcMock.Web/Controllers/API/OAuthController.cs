@@ -2,19 +2,20 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using SFA.DAS.HmrcMock.Application.Services;
 using SFA.DAS.HmrcMock.Application.TokenHandlers;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace SFA.DAS.HmrcMock.Web.Controllers.API;
 
     [Route("api/[controller]")]
     [ApiController]
-    [IgnoreAntiforgeryToken]
     public class OAuthController(
         ICreateAccessTokenHandler createAccessTokenHandler, 
         IAuthCodeService authCodeService,
         IScopeService scopeService, 
         IAuthRequestService authRequestService, 
-        IClientService clientService)
-        : ControllerBase
+        IClientService clientService,
+        ILogger<OAuthController> logger)
+        : Controller
     {
         [HttpGet("authorize")]
         public async Task<IActionResult> Authorize(
@@ -22,23 +23,25 @@ namespace SFA.DAS.HmrcMock.Web.Controllers.API;
             [FromQuery(Name = "client_id")]string? clientId, 
             [FromQuery(Name = "redirect_uri")]string redirectUri)
         {
+            logger.LogInformation($"{nameof(Authorize)} - {JsonSerializer.Serialize(new { scopeName, clientId, redirectUri })}");
             return await HandleAuth(scopeName, clientId, redirectUri);
         }
 
         [HttpPost("authorize")]
         public async Task<IActionResult> AuthorizePost([FromBody]AuthorizePostParams parameters)
         {
+            logger.LogInformation($"{nameof(AuthorizePost)} - {JsonSerializer.Serialize(parameters)}");
             return await HandleAuth(parameters.ScopeName, parameters.ClientId, parameters.RedirectUri);
         }
         
         [HttpPost("token")]
         public async Task<IActionResult> AccessToken([FromBody] TokenRequestModel tokenRequest)
         {
+            logger.LogInformation($"{nameof(AccessToken)} - {JsonSerializer.Serialize(tokenRequest)}");
             if (tokenRequest == null || string.IsNullOrEmpty(tokenRequest.Code))
             {
                 return BadRequest("Invalid request. Code is missing.");
             }
-
             var authCodeRecord = await authCodeService.Find(tokenRequest.Code);
             if (authCodeRecord == null)
             {

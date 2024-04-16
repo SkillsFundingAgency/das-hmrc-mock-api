@@ -11,7 +11,7 @@ public class FractionsController(
     IGatewayUserService gatewayUserService, 
     IAuthRecordService authRecordService,
     IFractionCalcService fractionCalcService,
-    IFractionService fractionService) : ControllerBase
+    IFractionService fractionService) : Controller
 {
     [HttpGet("epaye/{empRef}/fractions")]
     public async Task<IActionResult> Fractions([FromRoute]string empRef, [FromQuery]DateTime? fromDate, [FromQuery]DateTime? toDate)
@@ -65,6 +65,6 @@ public class FractionsController(
             }
         }
 
-        return Forbid();
+        return new ForbidResult();
     }
 }
