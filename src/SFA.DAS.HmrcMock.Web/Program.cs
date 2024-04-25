@@ -24,7 +24,7 @@ builder.Services.AddHealthChecks();
 
 builder.Services.AddSession();
 
-builder.Services.AddDasDistributedMemoryCache(hmrcMockConfiguration);
+builder.Services.AddDasDistributedMemoryCache(hmrcMockConfiguration!);
 
 // Add the custom AllowAnonymousFilter to the services
 builder.Services.AddScoped<AllowAnonymousFilter>();

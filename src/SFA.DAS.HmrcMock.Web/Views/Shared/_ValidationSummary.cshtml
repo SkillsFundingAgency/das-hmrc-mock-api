@@ -11,7 +11,7 @@
                 <ul class="govuk-list govuk-error-summary__list">
                     @foreach (var modelState in Model.OrderBy(c => c.Key))
                     {
-                        foreach (var error in modelState.Value.Errors)
+                        foreach (var error in modelState.Value!.Errors)
                         {
                             <li>
                                 @if (string.IsNullOrWhiteSpace(modelState.Key))

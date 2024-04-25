@@ -22,7 +22,7 @@ public class MongoScopeService(IMongoDatabase database) : BaseMongoService<Scope
 public class Scope
 {
     [BsonId]
-    [BsonRepresentation(BsonType.ObjectId)]  
+    [BsonRepresentation(BsonType.ObjectId)]
     [BsonElement("_id")]
     public string Id { get; set; }
 

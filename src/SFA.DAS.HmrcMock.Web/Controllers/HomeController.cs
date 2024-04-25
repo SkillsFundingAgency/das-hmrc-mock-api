@@ -32,7 +32,7 @@ public class HomeController(
             return View("SignIn", userData);
         }
 
-        var validationResult = await gatewayUserService.ValidateAsync(userData.UserId, userData.Password);
+        var validationResult = await gatewayUserService.ValidateAsync(userData.UserId!, userData.Password!);
 
         logger.LogInformation($"{nameof(SignIn)} - ValidationResult: {JsonSerializer.Serialize(validationResult)}");
 
@@ -42,7 +42,7 @@ public class HomeController(
 
             logger.LogInformation($"Set Cache entry: {JsonSerializer.Serialize(validationResult.GatewayID)}");
             
-            return Redirect(userData.Continue);
+            return Redirect(userData.Continue!);
         }
         else
         {

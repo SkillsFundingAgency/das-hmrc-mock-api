@@ -48,8 +48,8 @@ public class DeclarationsController(
             if (AuthenticationHeaderValue.TryParse(authHeader, out var accessToken))
             {
                 logger.LogInformation($"AccessToken: {JsonSerializer.Serialize(accessToken)}");
-                var authRecord = await authRecordService.Find(accessToken.Parameter);
-                var user = await gatewayUserService.GetByGatewayIdAsync(authRecord?.GatewayId);
+                var authRecord = await authRecordService.Find(accessToken.Parameter!);
+                var user = await gatewayUserService.GetByGatewayIdAsync(authRecord.GatewayId!);
 
                 if (user != null)
                 {
