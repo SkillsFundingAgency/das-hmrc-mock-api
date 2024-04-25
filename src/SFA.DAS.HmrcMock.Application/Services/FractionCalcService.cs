@@ -15,7 +15,7 @@ public class MongoFractionCalcService(IMongoDatabase database)
 {
     public async Task<FractionCalculationResponse> LastCalculationDate()
     {
-        var filter = Builders<FractionCalculationResponse>.Filter.Eq(_ => true, true);
+        var filter = Builders<FractionCalculationResponse>.Filter.Exists("_id");
         var document = await FindOne(filter);
         return document;
     }
