@@ -41,7 +41,7 @@ public class FractionsController(
         var lastCalculationDate = await fractionCalcService.LastCalculationDate();
         if (lastCalculationDate != null)
         {
-            return Ok(lastCalculationDate);
+            return Ok(lastCalculationDate.LastCalculationDate);
         }
         else
         {
