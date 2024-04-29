@@ -59,7 +59,7 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
 }
 
-app.UseHealthChecks("/ping");
+app.UseHealthChecks("/");
 
 app.UseStaticFiles();
 

@@ -15,9 +15,9 @@ public class DeclarationsController(
         ILogger<DeclarationsController> logger) : ControllerBase
 {
     [HttpGet("declarations")]
-    public async Task<IActionResult> LevyDeclarations([FromRoute] string empRef, [FromQuery] DateTime fromDate, [FromQuery] DateTime toDate)
+    public async Task<IActionResult> LevyDeclarations([FromRoute] string empRef, [FromQuery] DateTime? fromDate, [FromQuery] DateTime? toDate)
     {
-        logger.LogInformation($"{nameof(LevyDeclarations)}:- {JsonSerializer.Serialize(new{ empRef, fromDate, toDate })}");
+        logger.LogInformation($"{nameof(LevyDeclarations)}:- {JsonSerializer.Serialize(new { empRef, fromDate, toDate })}");
         empRef = HttpUtility.UrlDecode(empRef);
         return await TryAuthenticate(async _ =>
         {
@@ -25,13 +25,21 @@ public class DeclarationsController(
             if (response != null)
             {
                 logger.LogInformation($"{nameof(LevyDeclarations)}:- {JsonSerializer.Serialize(response)}");
-                var filteredDeclarations = response.Declarations
-                    .Where(x => x.SubmissionTime > fromDate 
-                                && x.SubmissionTime < toDate)
-                    .OrderByDescending(o => o.Id);
+                IEnumerable<DeclarationResponse> filteredDeclarations = response.Declarations;
 
+                if (fromDate != null)
+                {
+                    filteredDeclarations = filteredDeclarations.Where(x => x.SubmissionTime > fromDate);
+                }
+
+                if (toDate != null)
+                {
+                    filteredDeclarations = filteredDeclarations.Where(x => x.SubmissionTime < toDate);
+                }
+
+                filteredDeclarations = filteredDeclarations.OrderByDescending(o => o.Id);
                 response.Declarations = filteredDeclarations.ToList();
-                
+            
                 logger.LogInformation($"{nameof(LevyDeclarations)}:filtered:- {JsonSerializer.Serialize(response.Declarations)}");
                 return Ok(response);
             }
