@@ -35,7 +35,7 @@ public class LevyDeclarationResponse
 public class DeclarationResponse
 {
     [BsonElement("id")]
-    public long Id { get; set; }
+    public long DeclarationId { get; set; }
     [BsonElement("submissionTime")]
     public DateTime SubmissionTime { get; set; }
     [BsonElement("payrollPeriod")]
@@ -44,6 +44,8 @@ public class DeclarationResponse
     public long LevyDueYTD { get; set; }
     [BsonElement("levyAllowanceForFullYear")]
     public long LevyAllowanceForFullYear { get; set; }
+
+    public long Id => DeclarationId;
 }
 
 [BsonIgnoreExtraElements]
