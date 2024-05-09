@@ -1,4 +1,5 @@
 
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Logging.ApplicationInsights;
@@ -23,6 +24,7 @@ builder.Services.AddServiceRegistration();
 builder.Services.AddHealthChecks();
 
 builder.Services.AddSession();
+builder.Services.AddHealthChecks();
 
 builder.Services.AddDasDistributedMemoryCache(hmrcMockConfiguration!);
 
@@ -59,14 +61,11 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
 }
 
-app.UseHealthChecks("/");
+app.UseDasHealthChecks();
 
 app.UseStaticFiles();
-
 app.UseSession();
-
 app.UseMiddleware<RestoreRawRequestPathMiddleware>();
-
 app.UseRouting();
 
 app.UseEndpoints(endpointBuilder =>
