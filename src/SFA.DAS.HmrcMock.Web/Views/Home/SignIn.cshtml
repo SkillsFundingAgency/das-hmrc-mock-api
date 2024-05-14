@@ -1,0 +1,52 @@
+﻿@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model SFA.DAS.HmrcMock.Web.Models.SigninViewModel
+@{
+    ViewBag.Title = "Log in to the government gateway";
+}
+
+<div>
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+            <partial model="@ViewData.ModelState" name="_ValidationSummary"/>
+        </div>
+    </div>
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+            <h1 class="govuk-heading-xl govuk-!-margin-bottom-3">Sign in</h1>
+            <p class="govuk-hint govuk-!-font-size-24">Enter your Government Gateway credentials to sign in. You received these when you created your HMRC online account</p>
+            <div class="govuk-inset-text">
+                NOTE: This is a mockup of the HMRC Tax Platform - DO NOT ENTER LIVE GATEWAY CREDENTIALS!
+            </div>
+            <form method="POST">
+                <div class="govuk-form-group @((ViewData.ModelState[nameof(Model.UserId)]?.ValidationState == Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Invalid) ? "govuk-form-group--error" : "")">
+
+                    <label id="UserId-label" for="UserId" class="govuk-label">
+                        User ID
+                    </label>
+                    <span asp-validation-for="UserId" class="govuk-error-message"></span>
+                    <input id="UserId" name="UserId" type="text" maxlength="100" class="govuk-input govuk-!-width-two-thirds" aria-required="true"
+                           aria-describedby="@(!string.IsNullOrEmpty(Model.UserIdError) ? "error-message-userid" : "")"
+                           value="@Model.UserId"/>
+                </div>
+                <div class="govuk-form-group @((ViewData.ModelState[nameof(Model.Password)]?.ValidationState == Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Invalid) ? "govuk-form-group--error" : "")">
+
+                    <label id="Password-label" for="Password" class="govuk-label">
+                        Password
+                    </label>
+                    <span asp-validation-for="Password" class="govuk-error-message"></span>
+                    <input id="Password" name="Password" type="password" maxlength="100" class="govuk-input govuk-!-width-two-thirds" aria-required="true"
+                           aria-describedby="@(!string.IsNullOrEmpty(Model.PasswordError) ? "error-message-password" : "")"
+                           value="@Model.Password"/>
+                </div>
+                <!-- Hidden field for Model.Continue -->
+                <input type="hidden" id="Continue" name="Continue" value="@Model.Continue"/>
+
+                <!-- Hidden field for Model.Origin -->
+                <input type="hidden" id="Origin" name="Origin" value="@Model.Origin"/>
+                <div class="govuk-button-group">
+                    <button class="govuk-button" type="submit">Continue</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

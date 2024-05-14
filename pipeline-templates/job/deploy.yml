@@ -2,6 +2,7 @@ parameters:
   ServiceConnection:
   SolutionBaseName:
   Environment:
+  OverrideBlockOnPossibleDataLoss:
 
 jobs:
 - deployment: DeployWebApp
@@ -18,6 +19,15 @@ jobs:
             EnvironmentId: $(Environment.Id)
             PipelineName: $(Build.DefinitionName)
             RunId: $(Build.BuildId)
+        - template: azure-pipelines-templates/deploy/step/set-backendaccessrestrictions-variable.yml@das-platform-building-blocks
+          parameters:
+            ServiceConnection: ${{ parameters.ServiceConnection }}
+            SharedEnvResourceGroup: $(SharedEnvResourceGroup)
+            SharedEnvVirtualNetworkName : $(SharedEnvVirtualNetworkName)
+            BackEndAccessRestrictionsExcludedSubnets: $(BackEndAccessRestrictionsExcludedSubnets)
+            ResourceEnvironmentName: $(ResourceEnvironmentName)
+            UnrestrictedEnvironments: $(UnrestrictedEnvironments)
+            UptimeMonitoringAccessRestrictions: $(UptimeMonitoringAccessRestrictions)
         - template: azure-pipelines-templates/deploy/step/arm-deploy.yml@das-platform-building-blocks
           parameters:
             ServiceConnection: ${{ parameters.ServiceConnection }}
@@ -34,14 +44,16 @@ jobs:
           parameters:
             EnvironmentName: $(EnvironmentName)
             ServiceConnection: ${{ parameters.ServiceConnection }}
-            SourcePath: $(Pipeline.Workspace)/das-employer-config/Configuration/__ConfigFolderName__ #PLACEHOLDER
+            SourcePath: $(Pipeline.Workspace)/das-employer-config/Configuration/das-hmrc-mock-api
             StorageAccountName: $(ConfigurationStorageAccountName)
             StorageAccountResourceGroup: $(SharedEnvResourceGroup)
             TargetFileName: '*.schema.json'
             TableName: Configuration
-            ConfigurationSecrets: {} # remove this if there are no secrets that need to be mapped for config
+            ConfigurationSecrets:
+              MongoUri: $(MongoUri)
+              DefaultSessionRedisConnectionString: $(DefaultSessionRedisConnectionString)
         - template: azure-pipelines-templates/deploy/step/app-deploy.yml@das-platform-building-blocks
           parameters:
             ServiceConnection: ${{ parameters.ServiceConnection }}
             AppServiceName: $(AppServiceName)
-            DeploymentPackagePath: $(Pipeline.Workspace)/${{ parameters.SolutionBaseName }}/${{ parameters.SolutionBaseName }}.zip
+            DeploymentPackagePath: $(Pipeline.Workspace)/${{ parameters.SolutionBaseName }}/${{ parameters.SolutionBaseName }}.Web.zip
