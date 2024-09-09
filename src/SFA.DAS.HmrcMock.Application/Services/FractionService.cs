@@ -8,6 +8,8 @@ namespace SFA.DAS.HmrcMock.Application.Services;
 public interface IFractionService
 {
     Task<EnglishFractionDeclarationsResponse> GetByEmpRef(string empRef);
+
+    Task CreateFractionAsync(string empref);
 }
 
 public class MongoFractionService(IMongoDatabase database) : BaseMongoService<EnglishFractionDeclarationsResponse>(database, "fractions"), IFractionService
@@ -16,6 +18,29 @@ public class MongoFractionService(IMongoDatabase database) : BaseMongoService<En
     {
         var filter = Builders<EnglishFractionDeclarationsResponse>.Filter.Eq("empref", empref);
         return await FindOne(filter);
+    }
+
+    public async Task CreateFractionAsync(string empref)
+    {
+        await CreateOne(new EnglishFractionDeclarationsResponse
+        {
+            EmpRef = empref,
+            FractionCalcResponses =
+            [
+                new FractionCalcResponse
+                {
+                    CalculatedAt = DateTime.UtcNow,
+                    Fractions =
+                    [
+                        new FractionResponse
+                        {
+                            Region = "England",
+                            Value = "1.00"
+                        }
+                    ]
+                }
+            ]
+        });
     }
 }
 

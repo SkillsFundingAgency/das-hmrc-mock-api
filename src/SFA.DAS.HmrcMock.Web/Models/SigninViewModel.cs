@@ -6,7 +6,7 @@ public record SigninViewModel : ViewModelBase
 {
     [Required(ErrorMessage = "Enter your User ID")]
     [MinLength(1)]
-    public string? UserId { get; init; }
+    public string? UserId { get; set; }
     [Required(ErrorMessage = "Enter your password")]
     [MinLength(1)]
     public string? Password { get; init; }

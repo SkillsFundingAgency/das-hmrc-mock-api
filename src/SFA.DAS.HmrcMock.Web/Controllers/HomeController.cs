@@ -9,6 +9,8 @@ namespace SFA.DAS.HmrcMock.Web.Controllers;
 [Route("gg")]
 public class HomeController(
     IGatewayUserService gatewayUserService,
+    IFractionService fractionService,
+    ILevyDeclarationService levyDeclarationService,
     ILogger<HomeController> logger,
     IDistributedCache cache) : Controller
 {
@@ -32,8 +34,22 @@ public class HomeController(
             return View("SignIn", userData);
         }
 
-        var validationResult = await gatewayUserService.ValidateAsync(userData.UserId!, userData.Password!);
+        var splitDetails = userData.UserId.Split("_");
+        var shouldCreateDeclarations = splitDetails[0] == "LE";
+        _ = int.TryParse(splitDetails[1], out var numberOfDeclarations);
+        _ = long.TryParse(splitDetails[2], out var declarationAmount);
 
+        userData.UserId += DateTime.UtcNow.Ticks;
+        await gatewayUserService.CreateGatewayUserAsync(userData.UserId!, userData.Password!);
+        
+        var validationResult = await gatewayUserService.ValidateAsync(userData.UserId!, userData.Password!);
+        
+        await fractionService.CreateFractionAsync(validationResult.Empref);
+        await levyDeclarationService.CreateDeclarations(
+            validationResult.Empref, 
+            numberOfDeclarations,
+            declarationAmount);
+        
         logger.LogInformation($"{nameof(SignIn)} - ValidationResult: {JsonSerializer.Serialize(validationResult)}");
 
         if (validationResult != null)

@@ -8,6 +8,8 @@ namespace SFA.DAS.HmrcMock.Application.Services;
 public interface ILevyDeclarationService
 {
     Task<LevyDeclarationResponse> GetByEmpRef(string empRef);
+    
+    Task CreateDeclarations(string empref, int numberOfDeclarations, long amount);
 }
 
 public class MongoLevyDeclarationService(IMongoDatabase database) : BaseMongoService<LevyDeclarationResponse>(database, "declarations"), ILevyDeclarationService
@@ -16,6 +18,38 @@ public class MongoLevyDeclarationService(IMongoDatabase database) : BaseMongoSer
     {
         var filter = Builders<LevyDeclarationResponse>.Filter.Eq("empref", empref);
         return await FindOne(filter);
+    }
+
+    public async Task CreateDeclarations(string empref, int numberOfDeclarations, long amount)
+    {
+        var declarations = new List<DeclarationResponse>();
+        long levyDueYtd = 0;
+        for (var i = numberOfDeclarations; i > 0; i--)
+        {
+            _ = long.TryParse(DateTime.Now.ToString("yssfffffff"), out var declarationId);
+            var submissionDate = DateTime.Now.AddMonths(-i);
+            levyDueYtd += amount;
+            declarations.Add(new DeclarationResponse
+            {
+                DeclarationId = declarationId,
+                SubmissionTime = submissionDate,
+                LevyDueYTD = levyDueYtd,
+                LevyAllowanceForFullYear = 15000,
+                PayrollPeriod = new PayrollPeriodResponse
+                {
+                    Year = submissionDate.Year.ToString(),
+                    Month = submissionDate.Month,
+                }
+            });
+        }
+        
+        var levyDeclarationsDto = new LevyDeclarationResponse
+        {
+            EmpRef = empref,
+            Declarations = declarations
+        };
+
+        await CreateOne(levyDeclarationsDto);
     }
 }
 
