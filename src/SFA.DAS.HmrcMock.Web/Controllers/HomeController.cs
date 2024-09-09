@@ -11,6 +11,7 @@ public class HomeController(
     IGatewayUserService gatewayUserService,
     IFractionService fractionService,
     ILevyDeclarationService levyDeclarationService,
+    IEmpRefService empRefService,
     ILogger<HomeController> logger,
     IDistributedCache cache) : Controller
 {
@@ -45,11 +46,16 @@ public class HomeController(
         var validationResult = await gatewayUserService.ValidateAsync(userData.UserId!, userData.Password!);
         
         await fractionService.CreateFractionAsync(validationResult.Empref);
-        await levyDeclarationService.CreateDeclarations(
-            validationResult.Empref, 
-            numberOfDeclarations,
-            declarationAmount);
-        
+        await empRefService.CreateEmpRefAsync(validationResult.Empref);
+
+        if (shouldCreateDeclarations)
+        {
+            await levyDeclarationService.CreateDeclarationsAsync(
+                validationResult.Empref,
+                numberOfDeclarations,
+                declarationAmount);
+        }
+
         logger.LogInformation($"{nameof(SignIn)} - ValidationResult: {JsonSerializer.Serialize(validationResult)}");
 
         if (validationResult != null)

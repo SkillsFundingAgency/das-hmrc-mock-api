@@ -9,7 +9,7 @@ public interface IEmpRefService
 {
     Task<EmpRefResponse> GetByEmpRef(string empRef);
     
-    Task CreateEmpRef(string empRef);
+    Task CreateEmpRefAsync(string empRef);
 }
 
 public class MongoEmpRefService(IMongoDatabase database) : BaseMongoService<EmpRefResponse>(database, "emprefs"), IEmpRefService
@@ -20,7 +20,7 @@ public class MongoEmpRefService(IMongoDatabase database) : BaseMongoService<EmpR
         return await FindOne(filter);
     }
 
-    public async Task CreateEmpRef(string empRef)
+    public async Task CreateEmpRefAsync(string empRef)
     {
         var encodedEmpRef = Uri.EscapeDataString(empRef);
         var linkBase = $"/epaye/{encodedEmpRef}";

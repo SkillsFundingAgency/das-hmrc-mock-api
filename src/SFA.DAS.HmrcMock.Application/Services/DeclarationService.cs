@@ -9,7 +9,7 @@ public interface ILevyDeclarationService
 {
     Task<LevyDeclarationResponse> GetByEmpRef(string empRef);
     
-    Task CreateDeclarations(string empref, int numberOfDeclarations, long amount);
+    Task CreateDeclarationsAsync(string empref, int numberOfDeclarations, long amount);
 }
 
 public class MongoLevyDeclarationService(IMongoDatabase database) : BaseMongoService<LevyDeclarationResponse>(database, "declarations"), ILevyDeclarationService
@@ -20,7 +20,7 @@ public class MongoLevyDeclarationService(IMongoDatabase database) : BaseMongoSer
         return await FindOne(filter);
     }
 
-    public async Task CreateDeclarations(string empref, int numberOfDeclarations, long amount)
+    public async Task CreateDeclarationsAsync(string empref, int numberOfDeclarations, long amount)
     {
         var declarations = new List<DeclarationResponse>();
         long levyDueYtd = 0;
