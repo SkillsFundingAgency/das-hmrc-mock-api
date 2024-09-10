@@ -22,7 +22,7 @@ public class MongoEmpRefService(IMongoDatabase database) : BaseMongoService<EmpR
 
     public async Task CreateEmpRefAsync(string empRef)
     {
-        var encodedEmpRef = Uri.EscapeDataString(empRef);
+        var encodedEmpRef = empRef.Replace("/","%2");
         var linkBase = $"/epaye/{encodedEmpRef}";
         var empRefDto = new EmpRefResponse
         {
