@@ -24,11 +24,16 @@ public class MongoLevyDeclarationService(IMongoDatabase database) : BaseMongoSer
     {
         var declarations = new List<DeclarationResponse>();
         long levyDueYtd = 0;
+
         for (var i = numberOfDeclarations; i > 0; i--)
         {
             _ = long.TryParse(DateTime.Now.ToString("yssfffffff"), out var declarationId);
             var submissionDate = DateTime.Now.AddMonths(-i);
             levyDueYtd += amount;
+            
+            var payrollYear = GetPayrollYear(submissionDate);
+            var payrollMonth = GetPayrollMonth(submissionDate);
+
             declarations.Add(new DeclarationResponse
             {
                 DeclarationId = declarationId,
@@ -37,12 +42,12 @@ public class MongoLevyDeclarationService(IMongoDatabase database) : BaseMongoSer
                 LevyAllowanceForFullYear = 15000,
                 PayrollPeriod = new PayrollPeriodResponse
                 {
-                    Year = submissionDate.Year.ToString(),
-                    Month = submissionDate.Month,
+                    Year = payrollYear,
+                    Month = payrollMonth,
                 }
             });
         }
-        
+
         var levyDeclarationsDto = new LevyDeclarationResponse
         {
             EmpRef = empref,
@@ -51,6 +56,23 @@ public class MongoLevyDeclarationService(IMongoDatabase database) : BaseMongoSer
 
         await CreateOne(levyDeclarationsDto);
     }
+
+    private string GetPayrollYear(DateTime submissionDate)
+    {
+        // If the date is before April, it belongs to the previous payroll year
+        int startYear = submissionDate.Month < 4 ? submissionDate.Year - 1 : submissionDate.Year;
+        int endYear = startYear + 1;
+    
+        // Format as "YY-YY"
+        return $"{startYear % 100:00}-{endYear % 100:00}";
+    }
+
+    private int GetPayrollMonth(DateTime submissionDate)
+    {
+        // Payroll months are from May (1) to April (12)
+        return (submissionDate.Month - 4 + 12) % 12 + 1;
+    }
+
 }
 
 [BsonIgnoreExtraElements]
