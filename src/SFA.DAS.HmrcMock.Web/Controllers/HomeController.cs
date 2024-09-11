@@ -35,26 +35,7 @@ public class HomeController(
             return View("SignIn", userData);
         }
 
-        var splitDetails = userData.UserId.Split("_");
-        var shouldCreateDeclarations = splitDetails[0] == "LE";
-        _ = int.TryParse(splitDetails[1], out var numberOfDeclarations);
-        _ = long.TryParse(splitDetails[2], out var declarationAmount);
-
-        userData.UserId += DateTime.UtcNow.Ticks;
-        await gatewayUserService.CreateGatewayUserAsync(userData.UserId!, userData.Password!);
-        
-        var validationResult = await gatewayUserService.ValidateAsync(userData.UserId!, userData.Password!);
-        
-        await fractionService.CreateFractionAsync(validationResult.Empref);
-        await empRefService.CreateEmpRefAsync(validationResult.Empref);
-
-        if (shouldCreateDeclarations)
-        {
-            await levyDeclarationService.CreateDeclarationsAsync(
-                validationResult.Empref,
-                numberOfDeclarations,
-                declarationAmount);
-        }
+        var validationResult = await CheckOrCreate(userData.UserId!, userData.Password!); 
 
         logger.LogInformation($"{nameof(SignIn)} - ValidationResult: {JsonSerializer.Serialize(validationResult)}");
 
@@ -71,5 +52,34 @@ public class HomeController(
             ModelState.AddModelError("Username", "Bad user name or password");
             return View("SignIn", userData);
         }
+    }
+
+    private async Task<GatewayUserResponse> CheckOrCreate(string userId, string userPassword)
+    {
+        var validUser = await gatewayUserService.ValidateAsync(userId, userPassword);
+        if(validUser != null) return validUser;
+
+        var splitDetails = userId.Split("_");
+        var shouldCreateDeclarations = splitDetails[0] == "LE";
+        _ = int.TryParse(splitDetails[1], out var numberOfDeclarations);
+        _ = long.TryParse(splitDetails[2], out var declarationAmount);
+
+        userId += DateTime.UtcNow.Ticks;
+        await gatewayUserService.CreateGatewayUserAsync(userId, userPassword);
+        
+        validUser = await gatewayUserService.ValidateAsync(userId, userPassword);
+        
+        await fractionService.CreateFractionAsync(validUser.Empref);
+        await empRefService.CreateEmpRefAsync(validUser.Empref);
+
+        if (shouldCreateDeclarations)
+        {
+            await levyDeclarationService.CreateDeclarationsAsync(
+                validUser.Empref,
+                numberOfDeclarations,
+                declarationAmount);
+        }
+
+        return validUser;
     }
 }
