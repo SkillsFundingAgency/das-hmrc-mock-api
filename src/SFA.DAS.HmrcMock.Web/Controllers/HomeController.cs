@@ -15,6 +15,8 @@ public class HomeController(
     ILogger<HomeController> logger,
     IDistributedCache cache) : Controller
 {
+    private const string LevyAccountIdentifier = "LE";
+    
     [HttpGet]
     [Route("sign-in")]
     public IActionResult SignIn(
@@ -60,7 +62,7 @@ public class HomeController(
         if(validUser != null) return validUser;
 
         var splitDetails = userId.Split("_");
-        var shouldCreateDeclarations = splitDetails[0] == "LE";
+        var shouldCreateDeclarations = splitDetails[0] == LevyAccountIdentifier;
         _ = int.TryParse(splitDetails[1], out var numberOfDeclarations);
         _ = long.TryParse(splitDetails[2], out var declarationAmount);
 
