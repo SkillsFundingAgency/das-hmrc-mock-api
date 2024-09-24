@@ -2,6 +2,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.IdGenerators;
 using MongoDB.Driver;
+using SFA.DAS.HmrcMock.Application.Helpers;
 
 namespace SFA.DAS.HmrcMock.Application.Services;
 
@@ -60,6 +61,7 @@ public class EnglishFractionDeclarationsResponse
 public class FractionCalcResponse
 {
     [BsonElement("calculatedAt")]
+    [BsonSerializer(typeof(DateAsStringSerializer))]
     public DateTime CalculatedAt { get; set; }
     [BsonElement("fractions")]
     public List<FractionResponse> Fractions { get; set; }
