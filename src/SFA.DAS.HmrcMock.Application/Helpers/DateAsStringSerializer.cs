@@ -14,16 +14,28 @@ public class DateAsStringSerializer : IBsonSerializer<DateTime>
     public DateTime Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)
     {
         var bsonType = context.Reader.GetCurrentBsonType();
-        if (bsonType == BsonType.String)
+
+        switch (bsonType)
         {
-            var dateString = context.Reader.ReadString();
-            if (DateTime.TryParseExact(dateString, "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.None, out var date))
+            case BsonType.DateTime:
             {
-                return date;
+                var millisecondsSinceEpoch = context.Reader.ReadDateTime(); // Gets the long value (milliseconds since 1970)
+                return DateTimeOffset.FromUnixTimeMilliseconds(millisecondsSinceEpoch).UtcDateTime;
+            }
+            case BsonType.String:
+            {
+                var dateString = context.Reader.ReadString();
+                if (DateTime.TryParseExact(dateString, "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.None, out var date))
+                {
+                    return date;
+                }
+
+                break;
             }
         }
 
-        throw new BsonSerializationException($"Cannot deserialize BsonType {bsonType}, value {context.Reader.ReadString()} to DateTime.");
+
+        throw new BsonSerializationException($"Cannot deserialize BsonType {bsonType} to DateTime.");
     }
 
     object IBsonSerializer.Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)
@@ -39,7 +51,7 @@ public class DateAsStringSerializer : IBsonSerializer<DateTime>
         }
         else
         {
-            throw new BsonSerializationException($"Cannot Serialize BsonType {value.GetType()} to DateTime.");
+            throw new BsonSerializationException($"Cannot serialize BsonType {value.GetType()} to DateTime.");
         }
     }
 
