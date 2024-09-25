@@ -14,6 +14,7 @@ public class DateAsStringSerializer : IBsonSerializer<DateTime>
     public DateTime Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)
     {
         var bsonType = context.Reader.GetCurrentBsonType();
+        string dateString = string.Empty;
 
         switch (bsonType)
         {
@@ -24,7 +25,7 @@ public class DateAsStringSerializer : IBsonSerializer<DateTime>
             }
             case BsonType.String:
             {
-                var dateString = context.Reader.ReadString();
+                dateString = context.Reader.ReadString();
                 if (DateTime.TryParseExact(dateString, "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.None, out var date))
                 {
                     return date;
@@ -35,7 +36,7 @@ public class DateAsStringSerializer : IBsonSerializer<DateTime>
         }
 
 
-        throw new BsonSerializationException($"Cannot deserialize BsonType {bsonType} to DateTime.");
+        throw new BsonSerializationException($"Cannot deserialize BsonType {bsonType} value {dateString} to DateTime.");
     }
 
     object IBsonSerializer.Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)
