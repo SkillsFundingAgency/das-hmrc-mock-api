@@ -23,7 +23,7 @@ public class DateAsStringSerializer : IBsonSerializer<DateTime>
             }
         }
 
-        throw new BsonSerializationException($"Cannot deserialize BsonType {bsonType} to DateTime.");
+        throw new BsonSerializationException($"Cannot deserialize BsonType {bsonType}, value {context.Reader.ReadString()} to DateTime.");
     }
 
     object IBsonSerializer.Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)
