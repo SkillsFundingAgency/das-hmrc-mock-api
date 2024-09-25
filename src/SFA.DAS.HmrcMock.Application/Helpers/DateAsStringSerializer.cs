@@ -39,7 +39,7 @@ public class DateAsStringSerializer : IBsonSerializer<DateTime>
         }
         else
         {
-            throw new BsonSerializationException($"Cannot deserialize BsonType {value.GetType()} to DateTime.");
+            throw new BsonSerializationException($"Cannot Serialize BsonType {value.GetType()} to DateTime.");
         }
     }
 
