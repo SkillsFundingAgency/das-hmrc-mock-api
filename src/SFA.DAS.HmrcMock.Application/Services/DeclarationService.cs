@@ -59,8 +59,8 @@ public class MongoLevyDeclarationService(IMongoDatabase database) : BaseMongoSer
 
     private static string GetPayrollYear(DateTime submissionDate)
     {
-        // If the date is before April, it belongs to the previous payroll year
-        int startYear = submissionDate.Month < 5 ? submissionDate.Year - 1 : submissionDate.Year;
+        // If the date is before April, it belongs to the next payroll year
+        int startYear = submissionDate.Month < 4 ? submissionDate.Year - 1 : submissionDate.Year;
         int endYear = startYear + 1;
     
         // Format as "YY-YY"
@@ -69,7 +69,7 @@ public class MongoLevyDeclarationService(IMongoDatabase database) : BaseMongoSer
 
     private static int GetPayrollMonth(DateTime submissionDate)
     {
-        return submissionDate.Month >= 5 ? submissionDate.Month - 4 : submissionDate.Month + 8;
+        return submissionDate.Month >= 4 ? submissionDate.Month - 3 : submissionDate.Month + 9;
     }
 
 }
