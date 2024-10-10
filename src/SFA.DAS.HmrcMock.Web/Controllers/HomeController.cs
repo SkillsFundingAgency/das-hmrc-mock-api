@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using SFA.DAS.HmrcMock.Application.Services;
@@ -61,6 +62,12 @@ public class HomeController(
         var validUser = await gatewayUserService.ValidateAsync(userId, userPassword);
         if(validUser != null) return validUser;
 
+        var userIdPattern = @"^(NL|LE)_[1-9][0-9]?_[0-9]{1,9}$";
+        if (!Regex.IsMatch(userId, userIdPattern))
+        {
+            return null;
+        }
+        
         var splitDetails = userId.Split("_");
         var shouldCreateDeclarations = splitDetails[0] == LevyAccountIdentifier;
         _ = int.TryParse(splitDetails[1], out var numberOfDeclarations);
