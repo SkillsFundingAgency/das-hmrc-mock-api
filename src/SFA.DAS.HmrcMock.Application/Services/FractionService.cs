@@ -2,12 +2,15 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.IdGenerators;
 using MongoDB.Driver;
+using SFA.DAS.HmrcMock.Application.Helpers;
 
 namespace SFA.DAS.HmrcMock.Application.Services;
 
 public interface IFractionService
 {
     Task<EnglishFractionDeclarationsResponse> GetByEmpRef(string empRef);
+
+    Task CreateFractionAsync(string empref);
 }
 
 public class MongoFractionService(IMongoDatabase database) : BaseMongoService<EnglishFractionDeclarationsResponse>(database, "fractions"), IFractionService
@@ -16,6 +19,29 @@ public class MongoFractionService(IMongoDatabase database) : BaseMongoService<En
     {
         var filter = Builders<EnglishFractionDeclarationsResponse>.Filter.Eq("empref", empref);
         return await FindOne(filter);
+    }
+
+    public async Task CreateFractionAsync(string empref)
+    {
+        await CreateOne(new EnglishFractionDeclarationsResponse
+        {
+            EmpRef = empref,
+            FractionCalcResponses =
+            [
+                new FractionCalcResponse
+                {
+                    CalculatedAt = DateTime.UtcNow,
+                    Fractions =
+                    [
+                        new FractionResponse
+                        {
+                            Region = "England",
+                            Value = "1.00"
+                        }
+                    ]
+                }
+            ]
+        });
     }
 }
 
@@ -35,6 +61,7 @@ public class EnglishFractionDeclarationsResponse
 public class FractionCalcResponse
 {
     [BsonElement("calculatedAt")]
+    [BsonSerializer(typeof(DateAsStringSerializer))]
     public DateTime CalculatedAt { get; set; }
     [BsonElement("fractions")]
     public List<FractionResponse> Fractions { get; set; }

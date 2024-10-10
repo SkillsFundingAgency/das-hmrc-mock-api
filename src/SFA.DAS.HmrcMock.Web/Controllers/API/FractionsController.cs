@@ -14,24 +14,32 @@ public class FractionsController(
     IFractionService fractionService) : Controller
 {
     [HttpGet("epaye/{empRef}/fractions")]
-    public async Task<IActionResult> Fractions([FromRoute]string empRef, [FromQuery]DateTime? fromDate, [FromQuery]DateTime? toDate)
+    public async Task<IActionResult> Fractions([FromRoute] string empRef, [FromQuery] DateTime? fromDate, [FromQuery] DateTime? toDate)
     {
         empRef = HttpUtility.UrlDecode(empRef);
+
         return await TryAuthenticate(async _ =>
         {
             var response = await fractionService.GetByEmpRef(empRef);
-            if (response != null)
-            {
-                var filteredFractions = response.FractionCalcResponses
-                    .Where(x => x.CalculatedAt > fromDate 
-                                && x.CalculatedAt < toDate)
-                    .OrderBy(o => o.CalculatedAt);
+            if (response == null) return NotFound();
 
-                response.FractionCalcResponses = filteredFractions.ToList();
-                return Ok(response);
+            IEnumerable<FractionCalcResponse> filteredFractions = response.FractionCalcResponses;
+
+            if (fromDate != null)
+            {
+                filteredFractions = filteredFractions
+                    .Where(x => x.CalculatedAt.Date >= fromDate);
             }
 
-            return NotFound();
+            if (toDate != null)
+            {
+                filteredFractions = filteredFractions
+                    .Where(x => x.CalculatedAt <= toDate);
+            }
+
+            // Order by date and return the response
+            response.FractionCalcResponses = filteredFractions.OrderBy(x => x.CalculatedAt).ToList();
+            return Ok(response);
         });
     }
 
