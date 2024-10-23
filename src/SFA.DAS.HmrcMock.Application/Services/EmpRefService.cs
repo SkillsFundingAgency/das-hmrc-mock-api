@@ -8,6 +8,8 @@ namespace SFA.DAS.HmrcMock.Application.Services;
 public interface IEmpRefService
 {
     Task<EmpRefResponse> GetByEmpRef(string empRef);
+    
+    Task CreateEmpRefAsync(string empRef);
 }
 
 public class MongoEmpRefService(IMongoDatabase database) : BaseMongoService<EmpRefResponse>(database, "emprefs"), IEmpRefService
@@ -16,6 +18,32 @@ public class MongoEmpRefService(IMongoDatabase database) : BaseMongoService<EmpR
     {
         var filter = Builders<EmpRefResponse>.Filter.Eq("empref", empref);
         return await FindOne(filter);
+    }
+
+    public async Task CreateEmpRefAsync(string empRef)
+    {
+        var encodedEmpRef = empRef.Replace("/","%2");
+        var linkBase = $"/epaye/{encodedEmpRef}";
+        var empRefDto = new EmpRefResponse
+        {
+            EmpRef = empRef,
+            Links = new Links
+            {
+              Self  = new LinkObject{ Href =  $"{linkBase}" },
+              Declarations  = new LinkObject{ Href =  $"{linkBase}/declarations" },
+              Fractions  = new LinkObject{ Href =  $"{linkBase}/fractions" },
+              EmploymentCheck  = new LinkObject{ Href =  $"{linkBase}/employed" },
+            },
+            Employer = new Employer
+            {
+                Name = new Name
+                {
+                    NameLine1 = empRef
+                }
+            }
+        };
+
+        await CreateOne(empRefDto);
     }
 }
 

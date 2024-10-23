@@ -15,4 +15,9 @@ public class BaseMongoService<T>
     {
         return await _collection.Find(filter).FirstOrDefaultAsync();
     }
+
+    protected async Task CreateOne(T entity)
+    {
+        await _collection.InsertOneAsync(entity);
+    }
 }
