@@ -46,9 +46,10 @@ builder.Services.Configure<RouteOptions>(options =>
 
 builder.Services.AddDataProtection(rootConfiguration);
 
+builder.Services.AddApplicationInsightsTelemetry();
+
 builder.Services.AddLogging(builder =>
 {
-    builder.AddApplicationInsights();
     builder.AddFilter<ApplicationInsightsLoggerProvider>(string.Empty, LogLevel.Information);
     builder.AddFilter<ApplicationInsightsLoggerProvider>("Microsoft", LogLevel.Information);
 });
