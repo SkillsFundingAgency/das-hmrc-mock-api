@@ -48,11 +48,10 @@ builder.Services.AddDataProtection(rootConfiguration);
 
 builder.Services.AddLogging(builder =>
 {
+    builder.AddApplicationInsights();
     builder.AddFilter<ApplicationInsightsLoggerProvider>(string.Empty, LogLevel.Information);
     builder.AddFilter<ApplicationInsightsLoggerProvider>("Microsoft", LogLevel.Information);
 });
-
-builder.Services.AddApplicationInsightsTelemetry();
 
 var app = builder.Build();
 
@@ -72,7 +71,7 @@ app.UseEndpoints(endpointBuilder =>
 {
     // Map API controllers
     endpointBuilder.MapControllers();
-    
+
     endpointBuilder.MapControllerRoute(
         name: "default",
         pattern: "{controller=Home}/{action=SignIn}");
