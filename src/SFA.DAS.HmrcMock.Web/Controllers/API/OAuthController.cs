@@ -38,7 +38,46 @@ namespace SFA.DAS.HmrcMock.Web.Controllers.API;
         public async Task<IActionResult> AccessToken([FromBody] TokenRequestModel tokenRequest)
         {
             logger.LogInformation($"{nameof(AccessToken)} - {JsonSerializer.Serialize(tokenRequest)}");
-            if (tokenRequest == null || string.IsNullOrEmpty(tokenRequest.Code))
+            
+            switch (tokenRequest.GrantType)
+            {
+                case "authorization_code":
+                    return await HandleAuthorizationCodeGrantAsync(tokenRequest);
+
+                // case "refresh_token":
+                //     return await HandleRefreshTokenGrantAsync(request);
+
+                case "client_credentials":
+                    return await HandleClientCredentialsGrantAsync(tokenRequest);
+
+                default:
+                    return BadRequest(new { error = "unsupported_grant_type" });
+            }
+            
+        }
+
+        private async Task<IActionResult> HandleClientCredentialsGrantAsync(TokenRequestModel tokenRequest)
+        {
+
+            if (tokenRequest.ClientId == null || tokenRequest.ClientSecret == null) return null;
+
+            var client = await clientService.GetById(tokenRequest.ClientId);
+
+            if (client is not { PrivilegedAccess: true }) return null; //  CheckPrivilegedAccess(clientCredential, application))
+
+            var authCodeRecord = new AuthCodeRow
+            {
+                ClientId = client.ClientId,
+                Scope = "read:apprenticeship-levy",
+            };
+            
+            var accessToken = await createAccessTokenHandler.CreateAccessTokenAsync(authCodeRecord);
+            return Ok(accessToken);
+        }
+
+        private async Task<IActionResult> HandleAuthorizationCodeGrantAsync(TokenRequestModel tokenRequest)
+        {
+            if (string.IsNullOrEmpty(tokenRequest.Code))
             {
                 return BadRequest("Invalid request. Code is missing.");
             }
@@ -87,10 +126,10 @@ namespace SFA.DAS.HmrcMock.Web.Controllers.API;
         public string GrantType { get; set; }
         
         [JsonProperty("redirect_uri")]
-        public string RedirectUri { get; set; }
+        public string? RedirectUri { get; set; }
         
         [JsonProperty("code")]
-        public string Code { get; set; }
+        public string? Code { get; set; }
     }
     
     public class AuthorizePostParams
