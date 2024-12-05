@@ -73,6 +73,6 @@ public class FractionsController(
             }
         }
 
-        return new ForbidResult();
+        throw new UnauthorizedAccessException();
     }
 }
