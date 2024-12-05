@@ -60,7 +60,7 @@ namespace SFA.DAS.HmrcMock.Web.Controllers.API;
         {
 
             if (tokenRequest.ClientId == null || tokenRequest.ClientSecret == null) return null;
-
+            var scope = "read:apprenticeship-levy";
             var client = await clientService.GetById(tokenRequest.ClientId);
 
             if (client is not { PrivilegedAccess: true }) return null; //  CheckPrivilegedAccess(clientCredential, application))
@@ -68,10 +68,23 @@ namespace SFA.DAS.HmrcMock.Web.Controllers.API;
             var authCodeRecord = new AuthCodeRow
             {
                 ClientId = client.ClientId,
-                Scope = "read:apprenticeship-levy",
+                Scope = scope,
             };
             
             var accessToken = await createAccessTokenHandler.CreateAccessTokenAsync(authCodeRecord);
+           
+            var authCode = new AuthCodeRow
+            {
+                AuthorizationCode = accessToken.Token,
+                GatewayUserId = null,
+                ClientId = client.ClientId,
+                IssueDateTime = DateTime.UtcNow,
+                Scope = scope,
+                ExpirationSeconds = 4 * 60 * 60,
+                RedirectUri = ""
+            };
+
+            await authCodeService.Insert(authCode);
             return Ok(accessToken);
         }
 
