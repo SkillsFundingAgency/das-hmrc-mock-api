@@ -12,7 +12,7 @@ public class DeclarationsController(
     IGatewayUserService gatewayUserService, 
     IAuthRecordService authRecordService,
     ILevyDeclarationService levyDeclarationService,
-        ILogger<DeclarationsController> logger) : ControllerBase
+    ILogger<DeclarationsController> logger) : ControllerBase
 {
     [HttpGet("declarations")]
     public async Task<IActionResult> LevyDeclarations([FromRoute] string empRef, [FromQuery] DateTime? fromDate, [FromQuery] DateTime? toDate)
@@ -66,6 +66,6 @@ public class DeclarationsController(
             }
         }
 
-        return Forbid();
+        throw new UnauthorizedAccessException();
     }
 }

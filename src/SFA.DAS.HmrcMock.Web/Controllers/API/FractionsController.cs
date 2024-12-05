@@ -1,4 +1,5 @@
 using System.Net.Http.Headers;
+using System.Text.Json;
 using System.Web;
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.HmrcMock.Application.Services;
@@ -11,7 +12,8 @@ public class FractionsController(
     IGatewayUserService gatewayUserService, 
     IAuthRecordService authRecordService,
     IFractionCalcService fractionCalcService,
-    IFractionService fractionService) : Controller
+    IFractionService fractionService,
+    ILogger<FractionsController> logger) : Controller
 {
     [HttpGet("epaye/{empRef}/fractions")]
     public async Task<IActionResult> Fractions([FromRoute] string empRef, [FromQuery] DateTime? fromDate, [FromQuery] DateTime? toDate)
@@ -59,12 +61,16 @@ public class FractionsController(
     
     private async Task<IActionResult> TryAuthenticate(Func<GatewayUserResponse, Task<IActionResult>> action)
     {
+        logger.LogInformation($"Headers: {JsonSerializer.Serialize(HttpContext.Request.Headers)}");
+        
         if (HttpContext.Request.Headers.TryGetValue("Authorization", out var authHeader))
         {
+            logger.LogInformation($"Auth header: {JsonSerializer.Serialize(authHeader)}");
             if (AuthenticationHeaderValue.TryParse(authHeader, out var accessToken))
             {
-                var authRecord = await authRecordService.Find(accessToken.Parameter);
-                var user = await gatewayUserService.GetByGatewayIdAsync(authRecord?.GatewayId);
+                logger.LogInformation($"AccessToken: {JsonSerializer.Serialize(accessToken)}");
+                var authRecord = await authRecordService.Find(accessToken.Parameter!);
+                var user = await gatewayUserService.GetByGatewayIdAsync(authRecord.GatewayId!);
 
                 if (user != null)
                 {
