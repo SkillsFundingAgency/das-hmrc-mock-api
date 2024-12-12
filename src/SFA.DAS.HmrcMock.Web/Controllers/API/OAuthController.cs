@@ -64,10 +64,12 @@ namespace SFA.DAS.HmrcMock.Web.Controllers.API;
 
             if (client is not { PrivilegedAccess: true }) return null;
 
+            const string paUserId = "pa-user";
             var authCodeRecord = new AuthCodeRow
             {
                 ClientId = client.ClientId,
                 Scope = scope,
+                GatewayUserId = paUserId
             };
             
             var accessToken = await createAccessTokenHandler.CreateAccessTokenAsync(authCodeRecord);
@@ -76,7 +78,7 @@ namespace SFA.DAS.HmrcMock.Web.Controllers.API;
             var authCode = new AuthCodeRow
             {
                 AuthorizationCode = accessToken.Token,
-                GatewayUserId = null,
+                GatewayUserId = paUserId,
                 ClientId = client.ClientId,
                 IssueDateTime = DateTime.UtcNow,
                 Scope = scope,
