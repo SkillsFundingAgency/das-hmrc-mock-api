@@ -7,6 +7,7 @@ namespace SFA.DAS.HmrcMock.Application.TokenHandlers;
 public interface ICreateAccessTokenHandler
 {
     Task<AccessToken> CreateAccessTokenAsync(AuthCodeRow authInfo);
+    Task<AccessToken> RefreshAccessTokenAsync(string refreshToken);
 }
 
 public class CreateAccessTokenHandler(
@@ -20,6 +21,43 @@ public class CreateAccessTokenHandler(
         var authRecord = BuildAuthRecord(authInfo, privileged);
         await authRecordService.Insert(authRecord);
         return BuildAccessToken(authRecord);
+    }
+    
+    public async Task<AccessToken> RefreshAccessTokenAsync(string refreshToken)
+    {
+        var authRecord = await authRecordService.FindByRefreshToken(refreshToken);
+        if (authRecord == null)
+        {
+            var errorMessage = $"Cannot find an access token entry with refresh token {refreshToken}";
+            throw new ArgumentException(errorMessage);
+        }
+
+        if (authRecord.IsRefreshTokenExpired(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()))
+        {
+            var errorMessage = "Refresh token has expired";
+            throw new ArgumentException(errorMessage);
+        }
+        
+        var refreshedAt = DateTime.UtcNow;
+        var expireInOneHour = TimeSpan.FromSeconds(60);
+        
+        var updatedRecord = new AuthRecord
+        {
+            Id = authRecord.Id,
+            AccessToken = GenerateToken(),
+            RefreshToken = GenerateToken(),
+            RefreshedAt = refreshedAt,
+            GatewayId = authRecord.GatewayId,
+            CreatedAt = authRecord.CreatedAt,
+            ClientId = authRecord.ClientId,
+            ExpiresIn = (long)expireInOneHour.TotalSeconds,
+            Privileged = authRecord.Privileged,
+            Scope = authRecord.Scope
+        };
+
+        await authRecordService.Update(updatedRecord);
+
+        return BuildAccessToken(updatedRecord);
     }
 
     private async Task<bool> GetPrivilegedAsync(string? clientId)
@@ -36,7 +74,7 @@ public class CreateAccessTokenHandler(
         var accessToken = GenerateToken();
         var refreshToken = GenerateToken();
         var now = DateTime.UtcNow;
-        var expiresIn = TimeSpan.FromHours(4);
+        var expiresIn = TimeSpan.FromSeconds(40);
         var authRecord = new AuthRecord
         {
             AccessToken = accessToken,

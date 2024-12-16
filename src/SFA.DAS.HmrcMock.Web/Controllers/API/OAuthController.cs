@@ -44,8 +44,8 @@ namespace SFA.DAS.HmrcMock.Web.Controllers.API;
                 case "authorization_code":
                     return await HandleAuthorizationCodeGrantAsync(tokenRequest);
 
-                // case "refresh_token":
-                //     return await HandleRefreshTokenGrantAsync(request);
+                case "refresh_token":
+                    return await HandleRefreshTokenGrantAsync(tokenRequest);
 
                 case "client_credentials":
                     return await HandleClientCredentialsGrantAsync(tokenRequest);
@@ -54,6 +54,14 @@ namespace SFA.DAS.HmrcMock.Web.Controllers.API;
                     return BadRequest(new { error = "unsupported_grant_type" });
             }
             
+        }
+
+        private async Task<IActionResult> HandleRefreshTokenGrantAsync(TokenRequestModel tokenRequest)
+        {
+            if (tokenRequest.RefreshToken == null) return null;
+            var accessToken = await createAccessTokenHandler.RefreshAccessTokenAsync(tokenRequest.RefreshToken);
+
+            return Ok(accessToken);
         }
 
         private async Task<IActionResult> HandleClientCredentialsGrantAsync(TokenRequestModel tokenRequest)
@@ -145,6 +153,9 @@ namespace SFA.DAS.HmrcMock.Web.Controllers.API;
         
         [JsonProperty("code")]
         public string? Code { get; set; }
+        
+        [JsonProperty("refresh_token")]
+        public string? RefreshToken { get; set; }
     }
     
     public class AuthorizePostParams
