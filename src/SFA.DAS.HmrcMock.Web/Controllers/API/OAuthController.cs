@@ -38,7 +38,69 @@ namespace SFA.DAS.HmrcMock.Web.Controllers.API;
         public async Task<IActionResult> AccessToken([FromBody] TokenRequestModel tokenRequest)
         {
             logger.LogInformation($"{nameof(AccessToken)} - {JsonSerializer.Serialize(tokenRequest)}");
-            if (tokenRequest == null || string.IsNullOrEmpty(tokenRequest.Code))
+            
+            switch (tokenRequest.GrantType)
+            {
+                case "authorization_code":
+                    return await HandleAuthorizationCodeGrantAsync(tokenRequest);
+
+                case "refresh_token":
+                    return await HandleRefreshTokenGrantAsync(tokenRequest);
+
+                case "client_credentials":
+                    return await HandleClientCredentialsGrantAsync(tokenRequest);
+
+                default:
+                    return BadRequest(new { error = "unsupported_grant_type" });
+            }
+            
+        }
+
+        private async Task<IActionResult> HandleRefreshTokenGrantAsync(TokenRequestModel tokenRequest)
+        {
+            if (tokenRequest.RefreshToken == null) return null;
+            var accessToken = await createAccessTokenHandler.RefreshAccessTokenAsync(tokenRequest.RefreshToken);
+
+            return Ok(accessToken);
+        }
+
+        private async Task<IActionResult> HandleClientCredentialsGrantAsync(TokenRequestModel tokenRequest)
+        {
+            if (tokenRequest.ClientId == null || tokenRequest.ClientSecret == null) return null;
+            var scope = "read:apprenticeship-levy";
+            var client = await clientService.GetById(tokenRequest.ClientId);
+
+            if (client is not { PrivilegedAccess: true }) return null;
+
+            const string paUserId = "pa-user";
+            var authCodeRecord = new AuthCodeRow
+            {
+                ClientId = client.ClientId,
+                Scope = scope,
+                GatewayUserId = paUserId
+            };
+            
+            var accessToken = await createAccessTokenHandler.CreateAccessTokenAsync(authCodeRecord);
+           
+            logger.LogInformation($"Creating auth code {accessToken.Token}");
+            var authCode = new AuthCodeRow
+            {
+                AuthorizationCode = accessToken.Token,
+                GatewayUserId = paUserId,
+                ClientId = client.ClientId,
+                IssueDateTime = DateTime.UtcNow,
+                Scope = scope,
+                ExpirationSeconds = 4 * 60 * 60,
+                RedirectUri = ""
+            };
+
+            await authCodeService.Insert(authCode);
+            return Ok(accessToken);
+        }
+
+        private async Task<IActionResult> HandleAuthorizationCodeGrantAsync(TokenRequestModel tokenRequest)
+        {
+            if (string.IsNullOrEmpty(tokenRequest.Code))
             {
                 return BadRequest("Invalid request. Code is missing.");
             }
@@ -87,10 +149,13 @@ namespace SFA.DAS.HmrcMock.Web.Controllers.API;
         public string GrantType { get; set; }
         
         [JsonProperty("redirect_uri")]
-        public string RedirectUri { get; set; }
+        public string? RedirectUri { get; set; }
         
         [JsonProperty("code")]
-        public string Code { get; set; }
+        public string? Code { get; set; }
+        
+        [JsonProperty("refresh_token")]
+        public string? RefreshToken { get; set; }
     }
     
     public class AuthorizePostParams
