@@ -27,7 +27,7 @@ public class MongoGatewayUserService(IMongoDatabase database)
             GatewayID = userId,
             Name = userId,
             Password = password,
-            Empref = GeneratePAYEReference()
+            Empref = userId.Contains("6_6666") ? "666/X6666" : GeneratePAYEReference()
         };
 
         await CreateOne(user);
@@ -50,13 +50,13 @@ public class MongoGatewayUserService(IMongoDatabase database)
     
     private static readonly Random Random = new();
 
-    public static string GeneratePAYEReference()
+    private static string GeneratePAYEReference()
     {
         // Generate tax office number (3 digits)
-        string taxOfficeNumber = Random.Next(100, 1000).ToString(); // Generates a number between 100 and 999
+        var taxOfficeNumber = Random.Next(100, 1000).ToString(); // Generates a number between 100 and 999
 
         // Generate employer reference (1-3 letters followed by 4-6 digits)
-        string employerReference = GenerateEmployerReference();
+        var employerReference = GenerateEmployerReference();
 
         // Combine them in the format 123/A12345
         return $"{taxOfficeNumber}/{employerReference}";

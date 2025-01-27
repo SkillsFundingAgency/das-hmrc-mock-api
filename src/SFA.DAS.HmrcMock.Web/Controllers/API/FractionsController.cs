@@ -22,6 +22,12 @@ public class FractionsController(
 
         return await TryAuthenticate(async _ =>
         {
+            if (empRef == "666/X6666")
+            {
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, 
+                    "The service is temporarily unavailable for this scheme.");
+            }
+            
             var response = await fractionService.GetByEmpRef(empRef);
             if (response == null) return NotFound();
 

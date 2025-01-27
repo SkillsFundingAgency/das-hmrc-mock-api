@@ -36,11 +36,6 @@ builder.Services.Configure<RouteOptions>(options =>
 
 }).AddMvc(options =>
 {
-    if (!isIntegrationTest)
-    {
-        options.Filters.Add(new IgnoreAntiforgeryTokenAttribute()); 
-    }
-
     options.Filters.Add<AllowAnonymousFilter>();
 }).AddControllersAsServices().AddNewtonsoftJson();
 
