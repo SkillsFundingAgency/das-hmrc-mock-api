@@ -24,7 +24,6 @@ public class HomeController(
         [FromQuery(Name = "continue")] string? redirectUrl = null,
         [FromQuery] string? origin = null)
     {
-        
         logger.LogInformation($"{nameof(SignIn)} - {JsonSerializer.Serialize(new {redirectUrl, origin})}");
         return View(new SigninViewModel { Continue = redirectUrl, Origin = origin });
     }
