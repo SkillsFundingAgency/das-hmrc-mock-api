@@ -1,7 +1,5 @@
 ﻿using AutoFixture.NUnit3;
 using FluentAssertions;
-using FluentAssertions.Execution;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using NUnit.Framework;
@@ -11,6 +9,7 @@ using SFA.DAS.HmrcMock.Web.Models;
 using SFA.DAS.Testing.AutoFixture;
 
 namespace SFA.DAS.HmrcMock.Web.UnitTests.Controllers;
+
 public class HomeControllerTests
 {
     [Test, MoqAutoData]
@@ -85,8 +84,8 @@ public class HomeControllerTests
         };
         
         gatewayUserService
-            .Setup(g => g.ValidateAsync(viewModel.UserId, viewModel.Password))
-            .ReturnsAsync((GatewayUserResponse)null)
+            .Setup(g => g.ValidateAsync(viewModel.UserId!, viewModel.Password!))
+            .ReturnsAsync((GatewayUserResponse?)null)
             .Verifiable();
         
         // Act
@@ -94,7 +93,7 @@ public class HomeControllerTests
 
         // Assert
         actual.Should().NotBeNull();
-        var viewResult = actual.Should().BeAssignableTo<ViewResult>();
+        actual.Should().BeAssignableTo<ViewResult>();
         controller.ModelState.Should().ContainKey("Username");
         gatewayUserService.Verify();
         gatewayUserService.VerifyNoOtherCalls();
@@ -116,14 +115,86 @@ public class HomeControllerTests
         };
         
         gatewayUserService
-            .Setup(g => g.ValidateAsync(viewModel.UserId, viewModel.Password))
-            .ReturnsAsync((GatewayUserResponse)null)
+            .Setup(g => g.ValidateAsync(viewModel.UserId!, viewModel.Password!))
+            .ReturnsAsync((GatewayUserResponse?)null)
             .Verifiable();
         
         // Act
-        var actual = await controller.SignIn(viewModel);
+        await controller.SignIn(viewModel);
 
         // Assert
-        gatewayUserService.Verify(x => x.CreateGatewayUserAsync(It.Is<string>(s => s.StartsWith(viewModel.UserId)), viewModel.Password));
+        gatewayUserService.Verify(x => x.CreateGatewayUserAsync(It.Is<string>(s => s.StartsWith(viewModel.UserId)), viewModel.Password!));
+    }
+    
+    [Test]
+    [MoqAutoData]
+    public async Task Post_SignIn_Valid_LevyUserId_Create_Declarations(
+        SigninViewModel viewModel,
+        GatewayUserResponse gatewayUserResponse,
+        [Frozen] Mock<IGatewayUserService> gatewayUserService,
+        [Frozen] Mock<IFractionService> fractionService,
+        [Frozen] Mock<IEmpRefService> empRefService,
+        [Frozen] Mock<ILevyDeclarationService> levyDeclarationService,
+        [NoAutoProperties] HomeController controller)
+    {
+        // Arrange
+        const string userId = "LE_99_9999";
+        viewModel = viewModel with
+        {
+            UserId = userId
+        };
+        
+        gatewayUserService
+            .Setup(g => g.ValidateAsync(viewModel.UserId!, viewModel.Password!))
+            .ReturnsAsync((GatewayUserResponse?)null)
+            .Verifiable();
+        
+        gatewayUserService
+            .Setup(service => service.ValidateAsync(It.Is<string>(u => u != userId && u.StartsWith(userId)), It.IsAny<string>()))
+            .ReturnsAsync(gatewayUserResponse);
+        
+        // Act
+        await controller.SignIn(viewModel);
+
+        // Assert
+        empRefService.Verify(x => x.CreateEmpRefAsync(gatewayUserResponse.Empref));
+        fractionService.Verify(x => x.CreateFractionAsync(gatewayUserResponse.Empref));
+        levyDeclarationService.Verify(x => x.CreateDeclarationsAsync(gatewayUserResponse.Empref, 99, 9999));
+    }
+    
+    [Test]
+    [MoqAutoData]
+    public async Task Post_SignIn_Valid_NonLevyUserId_DoesNot_Create_Declarations(
+        SigninViewModel viewModel,
+        GatewayUserResponse gatewayUserResponse,
+        [Frozen] Mock<IGatewayUserService> gatewayUserService,
+        [Frozen] Mock<IFractionService> fractionService,
+        [Frozen] Mock<IEmpRefService> empRefService,
+        [Frozen] Mock<ILevyDeclarationService> levyDeclarationService,
+        [NoAutoProperties] HomeController controller)
+    {
+        // Arrange
+        const string userId = "NL_88_8888";
+        viewModel = viewModel with
+        {
+            UserId = userId
+        };
+        
+        gatewayUserService
+            .Setup(g => g.ValidateAsync(viewModel.UserId!, viewModel.Password!))
+            .ReturnsAsync((GatewayUserResponse?)null)
+            .Verifiable();
+        
+        gatewayUserService
+            .Setup(service => service.ValidateAsync(It.Is<string>(u => u != userId && u.StartsWith(userId)), It.IsAny<string>()))
+            .ReturnsAsync(gatewayUserResponse);
+        
+        // Act
+        _ = await controller.SignIn(viewModel);
+
+        // Assert
+        empRefService.Verify(x => x.CreateEmpRefAsync(gatewayUserResponse.Empref));
+        fractionService.Verify(x => x.CreateFractionAsync(gatewayUserResponse.Empref));
+        levyDeclarationService.VerifyNoOtherCalls();
     }
 }

@@ -6,8 +6,8 @@ namespace SFA.DAS.HmrcMock.Application.Services;
 
 public interface IGatewayUserService
 {
-    Task<GatewayUserResponse> ValidateAsync(string userId, string password);
-    Task<GatewayUserResponse> GetByGatewayIdAsync(string gatewayID);
+    Task<GatewayUserResponse?> ValidateAsync(string gatewayId, string password);
+    Task<GatewayUserResponse> GetByGatewayIdAsync(string gatewayId);
     Task CreateGatewayUserAsync(string userId, string password);
 }
 
@@ -27,7 +27,7 @@ public class MongoGatewayUserService(IMongoDatabase database)
             GatewayID = userId,
             Name = userId,
             Password = password,
-            Empref = userId.Contains("6_6666") ? "666/X6666" : GeneratePAYEReference()
+            Empref = userId.Contains("6_6666") ? "666/X6666" : GeneratePayeReference()
         };
 
         await CreateOne(user);
@@ -39,9 +39,9 @@ public class MongoGatewayUserService(IMongoDatabase database)
         return await FindOne(filter);
     }
 
-    public async Task<GatewayUserResponse> ValidateAsync(string gatewayID, string password)
+    public async Task<GatewayUserResponse?> ValidateAsync(string gatewayId, string password)
     {
-        var filter = Builders<GatewayUserResponse>.Filter.Eq(u => u.GatewayID, gatewayID) &
+        var filter = Builders<GatewayUserResponse>.Filter.Eq(u => u.GatewayID, gatewayId) &
                      Builders<GatewayUserResponse>.Filter.Eq(u => u.Password, password);
         var user = await _collection.Find(filter).FirstOrDefaultAsync();
 
@@ -50,7 +50,7 @@ public class MongoGatewayUserService(IMongoDatabase database)
     
     private static readonly Random Random = new();
 
-    private static string GeneratePAYEReference()
+    private static string GeneratePayeReference()
     {
         // Generate tax office number (3 digits)
         var taxOfficeNumber = Random.Next(100, 1000).ToString(); // Generates a number between 100 and 999

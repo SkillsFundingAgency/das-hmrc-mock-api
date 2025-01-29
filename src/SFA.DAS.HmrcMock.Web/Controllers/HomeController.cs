@@ -61,7 +61,7 @@ public class HomeController(
         var validUser = await gatewayUserService.ValidateAsync(userId, userPassword);
         if(validUser != null) return validUser;
 
-        var userIdPattern = @"^(NL|LE)_[1-9][0-9]?_[0-9]{1,9}$";
+        const string userIdPattern = @"^(NL|LE)_[1-9][0-9]?_[0-9]{1,9}$";
         if (!Regex.IsMatch(userId, userIdPattern, RegexOptions.None, TimeSpan.FromSeconds(10)))
         {
             return null;
