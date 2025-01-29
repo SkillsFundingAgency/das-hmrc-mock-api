@@ -23,37 +23,29 @@ namespace SFA.DAS.HmrcMock.Web.Controllers.API;
             [FromQuery(Name = "client_id")]string? clientId, 
             [FromQuery(Name = "redirect_uri")]string redirectUri)
         {
-            logger.LogInformation($"{nameof(Authorize)} - {JsonSerializer.Serialize(new { scopeName, clientId, redirectUri })}");
+            logger.LogInformation("{MethodName} - {SerializedRequest}", nameof(Authorize), JsonSerializer.Serialize(new { scopeName, clientId, redirectUri }));
             return await HandleAuth(scopeName, clientId, redirectUri);
         }
 
         [HttpPost("authorize")]
         public async Task<IActionResult> AuthorizePost([FromBody]AuthorizePostParams parameters)
         {
-            logger.LogInformation($"{nameof(AuthorizePost)} - {JsonSerializer.Serialize(parameters)}");
+            logger.LogInformation("{MethodName} - {SerializedRequest}", nameof(AuthorizePost), JsonSerializer.Serialize(parameters));
             return await HandleAuth(parameters.ScopeName, parameters.ClientId, parameters.RedirectUri);
         }
         
         [HttpPost("token")]
         public async Task<IActionResult> AccessToken([FromBody] TokenRequestModel tokenRequest)
         {
-            logger.LogInformation($"{nameof(AccessToken)} - {JsonSerializer.Serialize(tokenRequest)}");
-            
-            switch (tokenRequest.GrantType)
+            logger.LogInformation("{MethodName} - {SerializedRequest}", nameof(AccessToken), JsonSerializer.Serialize(tokenRequest));
+
+            return tokenRequest.GrantType switch
             {
-                case "authorization_code":
-                    return await HandleAuthorizationCodeGrantAsync(tokenRequest);
-
-                case "refresh_token":
-                    return await HandleRefreshTokenGrantAsync(tokenRequest);
-
-                case "client_credentials":
-                    return await HandleClientCredentialsGrantAsync(tokenRequest);
-
-                default:
-                    return BadRequest(new { error = "unsupported_grant_type" });
-            }
-            
+                "authorization_code" => await HandleAuthorizationCodeGrantAsync(tokenRequest),
+                "refresh_token" => await HandleRefreshTokenGrantAsync(tokenRequest),
+                "client_credentials" => await HandleClientCredentialsGrantAsync(tokenRequest),
+                _ => BadRequest(new { error = "unsupported_grant_type" })
+            };
         }
 
         private async Task<IActionResult> HandleRefreshTokenGrantAsync(TokenRequestModel tokenRequest)

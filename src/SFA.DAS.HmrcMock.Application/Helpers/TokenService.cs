@@ -8,7 +8,7 @@ public static class TokenService
 
     public static string GenerateToken()
     {
-        byte[] bytes = new byte[12];
+        var bytes = new byte[12];
         Random.GetBytes(bytes);
         return BitConverter.ToString(bytes).Replace("-", "").ToLower();
     }
