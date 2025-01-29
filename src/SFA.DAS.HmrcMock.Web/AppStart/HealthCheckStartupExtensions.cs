@@ -1,7 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 namespace SFA.DAS.HmrcMock.Web.AppStart;
 
+[ExcludeFromCodeCoverage]
 public static class HealthCheckStartupExtensions
 {
     public static IApplicationBuilder UseDasHealthChecks(this IApplicationBuilder app)

@@ -59,32 +59,45 @@ public class FractionsController(
         {
             return Ok(lastCalculationDate.LastCalculationDate);
         }
-        else
-        {
-            return NotFound();
-        }
+
+        return NotFound();
     }
     
     private async Task<IActionResult> TryAuthenticate(Func<GatewayUserResponse, Task<IActionResult>> action)
-    {
-        logger.LogInformation($"Headers: {JsonSerializer.Serialize(HttpContext.Request.Headers)}");
-        
+    {   
         if (HttpContext.Request.Headers.TryGetValue("Authorization", out var authHeader))
         {
-            logger.LogInformation($"Auth header: {JsonSerializer.Serialize(authHeader)}");
+            logger.LogInformation("Auth header: {Serialize}", JsonSerializer.Serialize(authHeader));
             if (AuthenticationHeaderValue.TryParse(authHeader, out var accessToken))
             {
-                logger.LogInformation($"AccessToken: {JsonSerializer.Serialize(accessToken)}");
-                var authRecord = await authRecordService.Find(accessToken.Parameter!);
-                var user = await gatewayUserService.GetByGatewayIdAsync(authRecord.GatewayId!);
+                logger.LogInformation("AccessToken: {Serialize}", JsonSerializer.Serialize(accessToken));
+                var authRecord = await authRecordService.Find(accessToken.Parameter);
+                
+                logger.LogInformation("Auth record: {Serialize}", JsonSerializer.Serialize(authRecord));
+                
+                var user = await gatewayUserService.GetByGatewayIdAsync(authRecord?.GatewayId);
 
+                logger.LogInformation("user: {Serialize}", JsonSerializer.Serialize(user));
+                
                 if (user != null)
                 {
+                    logger.LogInformation($"Executing action");
                     return await action(user);
                 }
+                
+                logger.LogInformation("User is null {Serialize}", JsonSerializer.Serialize(user));
+            }
+            else
+            {
+                logger.LogInformation("Cannot parse authorization header");
             }
         }
+        else
+        {
+            logger.LogInformation("No authorization header in the request");
+        }
 
-        throw new UnauthorizedAccessException();
+        logger.LogInformation("Cannot parse authorization header, {Serialize}", JsonSerializer.Serialize(HttpContext.Request.Headers));
+        return BadRequest();
     }
 }
