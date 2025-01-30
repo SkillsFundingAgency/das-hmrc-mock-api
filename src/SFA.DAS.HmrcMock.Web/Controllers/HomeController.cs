@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
@@ -30,6 +31,7 @@ public class HomeController(
 
     [HttpPost]
     [Route("sign-in")]
+    [SuppressMessage("RoslynSonarAnalyzer.Security", "S5146:Critical security vulnerability", Justification = "Stub code")]
     public async Task<IActionResult> SignIn(SigninViewModel userData)
     {
         if (!ModelState.IsValid)
