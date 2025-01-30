@@ -59,7 +59,7 @@ namespace SFA.DAS.HmrcMock.Web.Controllers.API;
         private async Task<IActionResult> HandleClientCredentialsGrantAsync(TokenRequestModel tokenRequest)
         {
             if (tokenRequest.ClientId == null || tokenRequest.ClientSecret == null) return null;
-            var scope = "read:apprenticeship-levy";
+            const string scope = "read:apprenticeship-levy";
             var client = await clientService.GetById(tokenRequest.ClientId);
 
             if (client is not { PrivilegedAccess: true }) return null;
@@ -74,7 +74,7 @@ namespace SFA.DAS.HmrcMock.Web.Controllers.API;
             
             var accessToken = await createAccessTokenHandler.CreateAccessTokenAsync(authCodeRecord);
            
-            logger.LogInformation($"Creating auth code {accessToken.Token}");
+            logger.LogInformation("Creating auth code {AccessToken}", accessToken.Token);
             var authCode = new AuthCodeRow
             {
                 AuthorizationCode = accessToken.Token,

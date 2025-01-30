@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using SFA.DAS.HmrcMock.Application.Services;
@@ -9,6 +10,7 @@ using SFA.DAS.HmrcMock.Web.Services;
 
 namespace SFA.DAS.HmrcMock.Web.AppStart;
 
+[ExcludeFromCodeCoverage]
 public static class AddServiceRegistrationExtension
 {
     public static void AddServiceRegistration(this IServiceCollection services)
