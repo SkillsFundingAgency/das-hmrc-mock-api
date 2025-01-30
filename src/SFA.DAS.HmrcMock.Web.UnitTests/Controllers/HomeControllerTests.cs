@@ -1,5 +1,6 @@
 ﻿using AutoFixture.NUnit3;
 using FluentAssertions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using NUnit.Framework;
@@ -111,7 +112,8 @@ public class HomeControllerTests
         // Arrange
         viewModel = viewModel with
         {
-            UserId = userId
+            UserId = userId,
+            Continue = "some-base.apprenticeships.education.gov.uk"
         };
         
         gatewayUserService
@@ -120,9 +122,10 @@ public class HomeControllerTests
             .Verifiable();
         
         // Act
-        await controller.SignIn(viewModel);
+        var result = await controller.SignIn(viewModel);
 
         // Assert
+        result.Should().BeAssignableTo<RedirectResult>();
         gatewayUserService.Verify(x => x.CreateGatewayUserAsync(It.Is<string>(s => s.StartsWith(viewModel.UserId)), viewModel.Password!));
     }
     
@@ -141,7 +144,8 @@ public class HomeControllerTests
         const string userId = "LE_99_9999";
         viewModel = viewModel with
         {
-            UserId = userId
+            UserId = userId,
+            Continue = "some-base.apprenticeships.education.gov.uk"
         };
         
         gatewayUserService
@@ -154,9 +158,10 @@ public class HomeControllerTests
             .ReturnsAsync(gatewayUserResponse);
         
         // Act
-        await controller.SignIn(viewModel);
+        var result = await controller.SignIn(viewModel);
 
         // Assert
+        result.Should().BeAssignableTo<RedirectResult>();
         empRefService.Verify(x => x.CreateEmpRefAsync(gatewayUserResponse.Empref));
         fractionService.Verify(x => x.CreateFractionAsync(gatewayUserResponse.Empref));
         levyDeclarationService.Verify(x => x.CreateDeclarationsAsync(gatewayUserResponse.Empref, 99, 9999));
@@ -177,7 +182,8 @@ public class HomeControllerTests
         const string userId = "NL_88_8888";
         viewModel = viewModel with
         {
-            UserId = userId
+            UserId = userId,
+            Continue = "some-base.apprenticeships.education.gov.uk"
         };
         
         gatewayUserService
@@ -190,11 +196,47 @@ public class HomeControllerTests
             .ReturnsAsync(gatewayUserResponse);
         
         // Act
-        _ = await controller.SignIn(viewModel);
+        var result = await controller.SignIn(viewModel);
 
         // Assert
+        result.Should().BeOfType<RedirectResult>();
         empRefService.Verify(x => x.CreateEmpRefAsync(gatewayUserResponse.Empref));
         fractionService.Verify(x => x.CreateFractionAsync(gatewayUserResponse.Empref));
         levyDeclarationService.VerifyNoOtherCalls();
+    }
+    
+    [Test]
+    [MoqAutoData]
+    public async Task Post_SignIn_Valid_BadRequest_OnInValidRedirect(
+        SigninViewModel viewModel,
+        GatewayUserResponse gatewayUserResponse,
+        [Frozen] Mock<IGatewayUserService> gatewayUserService,
+        [Frozen] Mock<IFractionService> fractionService,
+        [Frozen] Mock<IEmpRefService> empRefService,
+        [Frozen] Mock<ILevyDeclarationService> levyDeclarationService,
+        [NoAutoProperties] HomeController controller)
+    {
+        // Arrange
+        const string userId = "NL_88_8888";
+        viewModel = viewModel with
+        {
+            UserId = userId,
+            Continue = "some-test-place.es"
+        };
+        
+        gatewayUserService
+            .Setup(g => g.ValidateAsync(viewModel.UserId!, viewModel.Password!))
+            .ReturnsAsync((GatewayUserResponse?)null)
+            .Verifiable();
+        
+        gatewayUserService
+            .Setup(service => service.ValidateAsync(It.Is<string>(u => u != userId && u.StartsWith(userId)), It.IsAny<string>()))
+            .ReturnsAsync(gatewayUserResponse);
+        
+        // Act
+        var result = await controller.SignIn(viewModel);
+
+        // Assert
+        result.Should().BeAssignableTo<BadRequestResult>();
     }
 }

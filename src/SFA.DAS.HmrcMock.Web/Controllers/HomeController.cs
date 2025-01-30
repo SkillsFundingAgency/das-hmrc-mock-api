@@ -48,6 +48,11 @@ public class HomeController(
             logger.LogInformation($"Set Cache entry: {JsonSerializer.Serialize(validationResult.GatewayID)}");
 
             var redirectUrl = userData.Continue!;
+
+            if (!redirectUrl.Contains("apprenticeships.education.gov.uk"))
+            {
+                return BadRequest();
+            }
             
             return Redirect(redirectUrl);
         }
