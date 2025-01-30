@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.IdGenerators;
@@ -13,6 +14,7 @@ public interface IFractionService
     Task CreateFractionAsync(string empref);
 }
 
+[ExcludeFromCodeCoverage]
 public class MongoFractionService(IMongoDatabase database) : BaseMongoService<EnglishFractionDeclarationsResponse>(database, "fractions"), IFractionService
 {
     public async Task<EnglishFractionDeclarationsResponse> GetByEmpRef(string empref)

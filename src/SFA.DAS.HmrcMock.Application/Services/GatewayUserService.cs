@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
@@ -11,6 +12,7 @@ public interface IGatewayUserService
     Task CreateGatewayUserAsync(string userId, string password);
 }
 
+[ExcludeFromCodeCoverage]
 public class MongoGatewayUserService(IMongoDatabase database) 
     : BaseMongoService<GatewayUserResponse>(database, "gateway_users"), IGatewayUserService
 {

@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.IdGenerators;
@@ -13,6 +14,7 @@ public interface IAuthRecordService
     Task<AuthRecord> FindByRefreshToken(string refreshToken);
 }
 
+[ExcludeFromCodeCoverage]
 public class MongoAuthRecordService(IMongoDatabase database) : BaseMongoService<AuthRecord>(database, "sys_auth_records"), IAuthRecordService
 {
     public async Task<AuthRecord> Find(string accessToken)

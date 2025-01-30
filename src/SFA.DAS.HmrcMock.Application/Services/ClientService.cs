@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.IdGenerators;
@@ -10,6 +11,7 @@ public interface IClientService
     Task<Application> GetById(string? clientId);
 }
 
+[ExcludeFromCodeCoverage]
 public class MongoClientService(IMongoDatabase database) : BaseMongoService<Application>(database, "applications"), IClientService
 {
     public async Task<Application> GetById(string? clientId)

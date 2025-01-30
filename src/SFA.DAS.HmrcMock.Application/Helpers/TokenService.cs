@@ -1,7 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
 
 namespace SFA.DAS.HmrcMock.Application.Helpers;
 
+[ExcludeFromCodeCoverage]
 public static class TokenService
 {
     private static readonly RandomNumberGenerator Random = RandomNumberGenerator.Create();

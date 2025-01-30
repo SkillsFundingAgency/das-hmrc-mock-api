@@ -1,7 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
 using MongoDB.Driver;
 
 namespace SFA.DAS.HmrcMock.Application.Services;
 
+[ExcludeFromCodeCoverage]
 public class BaseMongoService<T>
 {
     protected readonly IMongoCollection<T> _collection;

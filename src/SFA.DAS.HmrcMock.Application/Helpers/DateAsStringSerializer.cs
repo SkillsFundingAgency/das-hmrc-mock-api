@@ -1,8 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 
 namespace SFA.DAS.HmrcMock.Application.Helpers;
 
+[ExcludeFromCodeCoverage]
 public class DateAsStringSerializer : IBsonSerializer<DateTime>
 {
     public void Serialize(BsonSerializationContext context, BsonSerializationArgs args, DateTime value)
