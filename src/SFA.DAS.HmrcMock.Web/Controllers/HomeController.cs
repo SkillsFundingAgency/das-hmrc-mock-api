@@ -46,8 +46,10 @@ public class HomeController(
             await cache.SetStringAsync("ValidatedUserKey", validationResult.GatewayID);
 
             logger.LogInformation($"Set Cache entry: {JsonSerializer.Serialize(validationResult.GatewayID)}");
+
+            var redirectUrl = userData.Continue!;
             
-            return Redirect(userData.Continue!);
+            return Redirect(redirectUrl);
         }
         else
         {
