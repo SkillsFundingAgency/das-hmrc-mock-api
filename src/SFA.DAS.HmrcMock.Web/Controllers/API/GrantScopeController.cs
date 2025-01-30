@@ -89,16 +89,12 @@ namespace SFA.DAS.HmrcMock.Web.Controllers.API;
         {
             var retryPolicy = Policy<string>
                 .HandleResult(result => result == null)
-                .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(2 * retryAttempt));
+                .WaitAndRetryAsync(2, retryAttempt => TimeSpan.FromMilliseconds(100 * retryAttempt));
 
             return await retryPolicy.ExecuteAsync(async () =>
             {
                 var validatedUser = await cache.GetStringAsync("ValidatedUserKey");
-                if (validatedUser == null)
-                {
-                    logger.LogInformation("Cache value not found, retrying...");
-                    throw new Exception("Cache value not found");
-                }
+              
                 return validatedUser;
             });
         }

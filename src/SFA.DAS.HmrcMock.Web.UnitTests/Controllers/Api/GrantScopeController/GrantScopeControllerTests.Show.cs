@@ -9,7 +9,7 @@ using GrantScopeController = SFA.DAS.HmrcMock.Web.Controllers.API.GrantScopeCont
 
 namespace SFA.DAS.HmrcMock.Web.UnitTests.Controllers.Api;
 
-public class GrantScopeControllerTests
+public partial class GrantScopeControllerTests
 {
     [Test, MoqAutoData]
     public async Task Show_ShouldReturnBadRequest_WhenInvalidAuthId(
