@@ -5,7 +5,7 @@ using Polly;
 using SFA.DAS.HmrcMock.Application.Helpers;
 using SFA.DAS.HmrcMock.Application.Services;
 
-namespace SFA.DAS.HmrcMock.Controllers;
+namespace SFA.DAS.HmrcMock.Web.Controllers.API;
 
     [Route("oauth/[controller]")]
     [ApiController]
@@ -20,7 +20,7 @@ namespace SFA.DAS.HmrcMock.Controllers;
         [HttpGet]
         public async Task<IActionResult> Show([FromQuery(Name = "auth_id")]string authId)
         {
-            logger.LogInformation($"{nameof(Show)} - {JsonSerializer.Serialize(authId)}");
+            logger.LogInformation("{ActionName} - {SerializedRequest}", nameof(Show), JsonSerializer.Serialize(authId));
             var auth = await authRequestService.Get(authId);
             if (auth == null)
                 return BadRequest("Unknown auth id");
