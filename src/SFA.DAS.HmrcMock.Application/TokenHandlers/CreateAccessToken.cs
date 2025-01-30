@@ -32,13 +32,13 @@ public class CreateAccessTokenHandler(
             throw new ArgumentException(errorMessage);
         }
 
-        if (authRecord.IsRefreshTokenExpired(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()))
+        if (authRecord.IsRefreshTokenExpired(DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond))
         {
             var errorMessage = "Refresh token has expired";
             throw new ArgumentException(errorMessage);
         }
         
-        var refreshedAt = DateTime.UtcNow;
+        var refreshedAt = DateTime.Now;
         var expireInOneHour = TimeSpan.FromSeconds(60);
         
         var updatedRecord = new AuthRecord
