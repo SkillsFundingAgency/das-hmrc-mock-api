@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
@@ -24,13 +25,13 @@ public class HomeController(
         [FromQuery(Name = "continue")] string? redirectUrl = null,
         [FromQuery] string? origin = null)
     {
-        
         logger.LogInformation($"{nameof(SignIn)} - {JsonSerializer.Serialize(new {redirectUrl, origin})}");
         return View(new SigninViewModel { Continue = redirectUrl, Origin = origin });
     }
 
     [HttpPost]
     [Route("sign-in")]
+    [SuppressMessage("RoslynSonarAnalyzer.Security", "S5146:Critical security vulnerability", Justification = "Stub code")]
     public async Task<IActionResult> SignIn(SigninViewModel userData)
     {
         if (!ModelState.IsValid)
@@ -47,8 +48,8 @@ public class HomeController(
             await cache.SetStringAsync("ValidatedUserKey", validationResult.GatewayID);
 
             logger.LogInformation($"Set Cache entry: {JsonSerializer.Serialize(validationResult.GatewayID)}");
-            
-            return Redirect(userData.Continue!);
+
+            return Redirect(userData.Continue);
         }
         else
         {
@@ -62,7 +63,7 @@ public class HomeController(
         var validUser = await gatewayUserService.ValidateAsync(userId, userPassword);
         if(validUser != null) return validUser;
 
-        var userIdPattern = @"^(NL|LE)_[1-9][0-9]?_[0-9]{1,9}$";
+        const string userIdPattern = @"^(NL|LE)_[1-9][0-9]?_[0-9]{1,9}$";
         if (!Regex.IsMatch(userId, userIdPattern, RegexOptions.None, TimeSpan.FromSeconds(10)))
         {
             return null;

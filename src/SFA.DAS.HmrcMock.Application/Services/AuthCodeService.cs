@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.IdGenerators;
@@ -12,6 +13,7 @@ public interface IAuthCodeService
     Task<int> Insert(AuthCodeRow authCode);
 }
 
+[ExcludeFromCodeCoverage]
 public class MongoAuthCodeService(IMongoDatabase database) : BaseMongoService<AuthCodeRow>(database, "sys_auth_codes"), IAuthCodeService
 {
     public async Task<AuthCodeRow> Find(string code)

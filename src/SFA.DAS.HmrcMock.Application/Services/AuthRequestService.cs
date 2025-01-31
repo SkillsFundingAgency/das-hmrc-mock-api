@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.IdGenerators;
@@ -12,6 +13,7 @@ public interface IAuthRequestService
     Task<AuthRequest> Delete(string id);
 }
 
+[ExcludeFromCodeCoverage]
 public class MongoAuthRequestService(IMongoDatabase database) : BaseMongoService<AuthRequest>(database, "sys_auth_requests"), IAuthRequestService
 {
     public async Task<string> Save(AuthRequest authRequest)

@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.IdGenerators;
@@ -12,6 +13,7 @@ public interface IEmpRefService
     Task CreateEmpRefAsync(string empRef);
 }
 
+[ExcludeFromCodeCoverage]
 public class MongoEmpRefService(IMongoDatabase database) : BaseMongoService<EmpRefResponse>(database, "emprefs"), IEmpRefService
 {
     public async Task<EmpRefResponse> GetByEmpRef(string empref)

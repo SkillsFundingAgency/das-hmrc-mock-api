@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
@@ -6,11 +7,12 @@ namespace SFA.DAS.HmrcMock.Application.Services;
 
 public interface IGatewayUserService
 {
-    Task<GatewayUserResponse> ValidateAsync(string userId, string password);
-    Task<GatewayUserResponse> GetByGatewayIdAsync(string gatewayID);
+    Task<GatewayUserResponse?> ValidateAsync(string gatewayId, string password);
+    Task<GatewayUserResponse> GetByGatewayIdAsync(string gatewayId);
     Task CreateGatewayUserAsync(string userId, string password);
 }
 
+[ExcludeFromCodeCoverage]
 public class MongoGatewayUserService(IMongoDatabase database) 
     : BaseMongoService<GatewayUserResponse>(database, "gateway_users"), IGatewayUserService
 {
@@ -27,7 +29,7 @@ public class MongoGatewayUserService(IMongoDatabase database)
             GatewayID = userId,
             Name = userId,
             Password = password,
-            Empref = GeneratePAYEReference()
+            Empref = userId.Contains("6_6666") ? "666/X6666" : GeneratePayeReference()
         };
 
         await CreateOne(user);
@@ -39,9 +41,9 @@ public class MongoGatewayUserService(IMongoDatabase database)
         return await FindOne(filter);
     }
 
-    public async Task<GatewayUserResponse> ValidateAsync(string gatewayID, string password)
+    public async Task<GatewayUserResponse?> ValidateAsync(string gatewayId, string password)
     {
-        var filter = Builders<GatewayUserResponse>.Filter.Eq(u => u.GatewayID, gatewayID) &
+        var filter = Builders<GatewayUserResponse>.Filter.Eq(u => u.GatewayID, gatewayId) &
                      Builders<GatewayUserResponse>.Filter.Eq(u => u.Password, password);
         var user = await _collection.Find(filter).FirstOrDefaultAsync();
 
@@ -50,13 +52,13 @@ public class MongoGatewayUserService(IMongoDatabase database)
     
     private static readonly Random Random = new();
 
-    public static string GeneratePAYEReference()
+    private static string GeneratePayeReference()
     {
         // Generate tax office number (3 digits)
-        string taxOfficeNumber = Random.Next(100, 1000).ToString(); // Generates a number between 100 and 999
+        var taxOfficeNumber = Random.Next(100, 1000).ToString(); // Generates a number between 100 and 999
 
         // Generate employer reference (1-3 letters followed by 4-6 digits)
-        string employerReference = GenerateEmployerReference();
+        var employerReference = GenerateEmployerReference();
 
         // Combine them in the format 123/A12345
         return $"{taxOfficeNumber}/{employerReference}";

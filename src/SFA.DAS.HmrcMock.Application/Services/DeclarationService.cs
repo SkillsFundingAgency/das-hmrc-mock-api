@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.IdGenerators;
@@ -12,6 +13,7 @@ public interface ILevyDeclarationService
     Task CreateDeclarationsAsync(string empref, int numberOfDeclarations, long amount);
 }
 
+[ExcludeFromCodeCoverage]
 public class MongoLevyDeclarationService(IMongoDatabase database) : BaseMongoService<LevyDeclarationResponse>(database, "declarations"), ILevyDeclarationService
 {
     public async Task<LevyDeclarationResponse> GetByEmpRef(string empref)

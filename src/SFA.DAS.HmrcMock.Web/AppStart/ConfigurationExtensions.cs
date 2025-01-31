@@ -1,7 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
 using SFA.DAS.Configuration.AzureTableStorage;
 
 namespace SFA.DAS.HmrcMock.Web.AppStart;
 
+[ExcludeFromCodeCoverage]
 public static class ConfigurationExtensions
 {
     public static IConfigurationRoot LoadConfiguration(this IConfiguration config, bool isIntegrationTest)

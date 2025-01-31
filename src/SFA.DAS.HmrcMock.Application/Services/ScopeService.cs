@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
@@ -9,6 +10,7 @@ public interface IScopeService
     Task<Scope> GetByName(string name);
 }
 
+[ExcludeFromCodeCoverage]
 public class MongoScopeService(IMongoDatabase database) : BaseMongoService<Scope>(database, "sys_scopes"), IScopeService
 {
     public async Task<Scope> GetByName(string name)

@@ -1,6 +1,3 @@
-
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Logging.ApplicationInsights;
 using SFA.DAS.HmrcMock.Domain.Configuration;
@@ -36,23 +33,18 @@ builder.Services.Configure<RouteOptions>(options =>
 
 }).AddMvc(options =>
 {
-    if (!isIntegrationTest)
-    {
-        options.Filters.Add(new IgnoreAntiforgeryTokenAttribute()); 
-    }
-
     options.Filters.Add<AllowAnonymousFilter>();
 }).AddControllersAsServices().AddNewtonsoftJson();
 
 builder.Services.AddDataProtection(rootConfiguration);
+
+builder.Services.AddApplicationInsightsTelemetry();
 
 builder.Services.AddLogging(builder =>
 {
     builder.AddFilter<ApplicationInsightsLoggerProvider>(string.Empty, LogLevel.Information);
     builder.AddFilter<ApplicationInsightsLoggerProvider>("Microsoft", LogLevel.Information);
 });
-
-builder.Services.AddApplicationInsightsTelemetry();
 
 var app = builder.Build();
 
@@ -72,7 +64,7 @@ app.UseEndpoints(endpointBuilder =>
 {
     // Map API controllers
     endpointBuilder.MapControllers();
-    
+
     endpointBuilder.MapControllerRoute(
         name: "default",
         pattern: "{controller=Home}/{action=SignIn}");

@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.IdGenerators;
@@ -10,6 +11,7 @@ public interface IFractionCalcService
     Task<FractionCalculationResponse?> LastCalculationDate();
 }
 
+[ExcludeFromCodeCoverage]
 public class MongoFractionCalcService(IMongoDatabase database) 
     : BaseMongoService<FractionCalculationResponse>(database, "fraction_calculation_date"), IFractionCalcService
 {
