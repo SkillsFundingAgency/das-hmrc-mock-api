@@ -1,4 +1,4 @@
-﻿using AutoFixture.NUnit3;
+using AutoFixture.NUnit3;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -95,11 +95,36 @@ public class HomeControllerTests
         // Assert
         actual.Should().NotBeNull();
         actual.Should().BeAssignableTo<ViewResult>();
-        controller.ModelState.Should().ContainKey("Username");
+        controller.ModelState.Should().ContainKey(nameof(SigninViewModel.UserId));
         gatewayUserService.Verify();
         gatewayUserService.VerifyNoOtherCalls();
     }
     
+    [Test]
+    [MoqAutoData]
+    public async Task Post_SignIn_With_ConventionPlusTicks_Finds_Existing_User_And_Does_Not_Create(
+        SigninViewModel viewModel,
+        GatewayUserResponse existingUser,
+        [Frozen] Mock<IGatewayUserService> gatewayUserService,
+        [NoAutoProperties] HomeController controller)
+    {
+        // Arrange: user signs in second time with convention+ticks (stored ID from first login)
+        var conventionPlusTicks = "LE_1_1000" + DateTime.UtcNow.Ticks;
+        viewModel = viewModel with { UserId = conventionPlusTicks, Continue = "https://example.com/callback" };
+        existingUser.GatewayID = conventionPlusTicks;
+        gatewayUserService
+            .Setup(g => g.ValidateAsync(conventionPlusTicks, viewModel.Password!))
+            .ReturnsAsync(existingUser);
+
+        // Act
+        var result = await controller.SignIn(viewModel);
+
+        // Assert: redirect (success), and CreateGatewayUserAsync was never called
+        result.Should().BeAssignableTo<RedirectResult>();
+        gatewayUserService.Verify(g => g.ValidateAsync(conventionPlusTicks, viewModel.Password!), Times.Once);
+        gatewayUserService.Verify(g => g.CreateGatewayUserAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+    }
+
     [Test]
     [MoqInlineAutoData("LE_99_9999")]
     [MoqInlineAutoData("NL_1_8888")]

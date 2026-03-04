@@ -348,4 +348,9 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
-src/.idea/.idea.SFA.DAS.HmrcMock/.idea/vcs.xml
+
+# JetBrains Rider / IntelliJ IDEA (e.g. indexLayout.xml, workspace.xml, vcs.xml)
+.idea/
+*.iml
+rider.project.model.nuget.info
+rider.project.restore.info
